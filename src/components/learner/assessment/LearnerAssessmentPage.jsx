@@ -80,44 +80,60 @@ export default function LearnerAssessmentPage() {
                 <FaStar size={10} className="text-amber-400" />
                 {item.totalMarks} marks
               </span>
-              <span className="flex items-center gap-1">
-                <FaClock size={10} />
-                Self-paced
-              </span>
             </div>
           </div>
 
           {/* SUBMISSION COLUMN */}
-          <div className='bg-gray-50 rounded-lg p-3 border border-gray-100'>
+          <div className='rounded-lg p-3 border border-gray-100'>
             {hasSubmission && submission ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <FaCheckCircle className="text-green-500 text-sm" />
-                    <span className="text-sm font-medium text-gray-800">Submitted</span>
+              <div className="flex bg-white items-start ">
+                <div className="flex-1 min-w-0">
+                  {/* Status Row */}
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <FaCheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="text-sm font-semibold text-gray-900">Submitted</span>
+                    </div>
+
                     {status === 'GRADED' && (
-                      <Badge bg="success" className="text-xs">Graded</Badge>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Graded
+                      </span>
                     )}
                     {status === 'RE_SUBMITTED' && (
-                      <Badge className="text-xs !bg-amber-700 text-uppercase font-bold">Resubmitted</Badge>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase bg-amber-100 text-amber-800">
+                        Resubmitted
+                      </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500">
-                    Submitted on: {formatSubmissionDate(submission.submittedAt)}
-                  </p>
-                  {submission.obtainedMarks !== null && (
-                    <p className="text-xs font-medium text-gray-700 mt-1">
-                      Score: {submission.obtainedMarks}/{item.totalMarks}
+
+                  {/* Meta Info */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-500">
+                      Submitted on <span className="text-gray-700 font-medium">{formatSubmissionDate(submission.submittedAt)}</span>
                     </p>
-                  )}
+
+                    {submission.obtainedMarks !== null && (
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <span className="text-xs text-gray-500">Score</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-xs font-bold text-gray-900">
+                          {submission.obtainedMarks}
+                          <span className="text-gray-400 font-normal mx-0.5">/</span>
+                          {item.totalMarks}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
                 <Button
                   onClick={() => navigate(`${item.id}`)}
                   size="sm"
                   variant="outline-primary"
-                  className="rounded-md text-xs"
+                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200"
                 >
-                  <FaEye size={12} className="inline mr-1" /> View
+                  <FaEye className="w-3.5 h-3.5" />
+                  View
                 </Button>
               </div>
             ) : (
@@ -202,9 +218,30 @@ export default function LearnerAssessmentPage() {
         </div>
 
         <Accordion defaultActiveKey={[]}>
+
+          {/* Test */}
+          {assessments.test.length > 0 && (
+            <Accordion.Item eventKey="0" className="my-3 border rounded-lg overflow-hidden shadow-sm">
+              <Accordion.Header>
+                <div className="flex items-center gap-2">
+                  <FaGraduationCap className="text-red-500 text-sm" />
+                  <span className="font-semibold text-sm text-gray-700">Test</span>
+                  <Badge bg="secondary" className="ms-2 rounded-pill">
+                    {assessments.test.length}
+                  </Badge>
+                </div>
+              </Accordion.Header>
+              <Accordion.Body className="p-3">
+                {assessments.test.map((item) => (
+                  <AssessmentItem path={`${item?.id}/write`} key={item.id} item={item} />
+                ))}
+              </Accordion.Body>
+            </Accordion.Item>
+          )}
+
           {/* Learner Workbooks */}
           {assessments.learnerWorkbooks.length > 0 && (
-            <Accordion.Item eventKey="0" className="mb-3 border rounded-lg overflow-hidden shadow-sm">
+            <Accordion.Item eventKey="1" className="my-3 border rounded-lg overflow-hidden shadow-sm">
               <Accordion.Header className="bg-white">
                 <div className="flex items-center gap-2">
                   <FaFlask className="text-blue-500 text-sm" />
@@ -224,7 +261,7 @@ export default function LearnerAssessmentPage() {
 
           {/* Summative Assessments */}
           {assessments.summative.length > 0 && (
-            <Accordion.Item eventKey="1" className="mb-3 border rounded-lg overflow-hidden shadow-sm">
+            <Accordion.Item eventKey="2" className="my-3 border rounded-lg overflow-hidden shadow-sm">
               <Accordion.Header>
                 <div className="flex items-center gap-2">
                   <FaChartLine className="text-green-500 text-sm" />
@@ -242,25 +279,7 @@ export default function LearnerAssessmentPage() {
             </Accordion.Item>
           )}
 
-          {/* Test */}
-          {assessments.test.length > 0 && (
-            <Accordion.Item eventKey="2" className="border rounded-lg overflow-hidden shadow-sm">
-              <Accordion.Header>
-                <div className="flex items-center gap-2">
-                  <FaGraduationCap className="text-red-500 text-sm" />
-                  <span className="font-semibold text-sm text-gray-700">Test</span>
-                  <Badge bg="secondary" className="ms-2 rounded-pill">
-                    {assessments.test.length}
-                  </Badge>
-                </div>
-              </Accordion.Header>
-              <Accordion.Body className="p-3">
-                {assessments.test.map((item) => (
-                  <AssessmentItem path={`${item?.id}/write`} key={item.id} item={item} />
-                ))}
-              </Accordion.Body>
-            </Accordion.Item>
-          )}
+
         </Accordion>
       </div>
     </div>

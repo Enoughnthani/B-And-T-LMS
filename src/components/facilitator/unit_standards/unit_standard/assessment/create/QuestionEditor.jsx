@@ -1,5 +1,6 @@
 import { FaPlus } from 'react-icons/fa';
 import { Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function QuestionEditor({ question, onUpdate }) {
   const updateOption = (optionIndex, value) => {
@@ -69,20 +70,20 @@ export default function QuestionEditor({ question, onUpdate }) {
       return (
         <div className="flex gap-4">
           <label className="flex items-center gap-2">
-            <input 
-              type="radio" 
-              name={`tf-${question.id}`} 
-              checked={question.correctAnswer === 'true'} 
-              onChange={() => onUpdate(question.id, 'correctAnswer', 'true')} 
+            <input
+              type="radio"
+              name={`tf-${question.id}`}
+              checked={question.correctAnswer === 'true'}
+              onChange={() => onUpdate(question.id, 'correctAnswer', 'true')}
             />
             <span>True</span>
           </label>
           <label className="flex items-center gap-2">
-            <input 
-              type="radio" 
-              name={`tf-${question.id}`} 
-              checked={question.correctAnswer === 'false'} 
-              onChange={() => onUpdate(question.id, 'correctAnswer', 'false')} 
+            <input
+              type="radio"
+              name={`tf-${question.id}`}
+              checked={question.correctAnswer === 'false'}
+              onChange={() => onUpdate(question.id, 'correctAnswer', 'false')}
             />
             <span>False</span>
           </label>
@@ -91,27 +92,57 @@ export default function QuestionEditor({ question, onUpdate }) {
 
     case 'FILL_IN_BLANKS':
       return (
-        <div>
-          <p className="text-sm text-gray-500 mb-2">
-            Use <span className="text-blue-600">[blank]</span> to indicate missing words
-          </p>
-          <textarea 
-            value={question.text} 
-            onChange={(e) => onUpdate(question.id, 'text', e.target.value)} 
-            placeholder="Type your sentence with [blank] for missing words..." 
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm min-h-[100px]" 
-          />
+        <div className="space-y-4">
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Question Text (use ___ for blanks)
+            </label>
+          </div>
+
+          <div>
+            {(() => {
+              const blankCount = (question.text?.match(/___/g) || []).length;
+              
+              if (blankCount > 0) {
+                return (<div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Correct Answers
+                  </label>
+
+                  {Array(blankCount).fill(0).map((_, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div className="w-24 text-sm font-medium text-gray-600">
+                        Blank {idx + 1}:
+                      </div>
+                      <input
+                        type="text"
+                        value={question.blanks?.[idx] || ''}
+                        onChange={(e) => {
+                          const newAnswers = [...(question.blanks || [])];
+                          newAnswers[idx] = e.target.value;
+                          onUpdate(question.id, 'blanks', newAnswers);
+                        }}
+                        placeholder={`Correct answer for blank ${idx + 1}`}
+                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                      />
+                    </div>
+                  ))}
+                </div>)
+              }
+            })()}
+          </div>
         </div>
       );
 
     case 'LONG_QUESTION':
       return (
         <div>
-          <textarea 
-            value={question.sampleAnswer} 
-            onChange={(e) => onUpdate(question.id, 'sampleAnswer', e.target.value)} 
-            placeholder="Provide a sample answer or rubric for grading..." 
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm min-h-[120px]" 
+          <textarea
+            value={question.sampleAnswer}
+            onChange={(e) => onUpdate(question.id, 'sampleAnswer', e.target.value)}
+            placeholder="Provide a sample answer or rubric for grading..."
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm min-h-[120px]"
           />
         </div>
       );

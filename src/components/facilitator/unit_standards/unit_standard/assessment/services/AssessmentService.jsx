@@ -2,17 +2,18 @@ import { apiFetch } from '@/api/api';
 import { BASE_URL } from '@/utils/apiEndpoint';
 
 export const assessmentService = {
-  // Get all assessments for a unit standard
+
   getAssessments: (unitStandardId) =>
     apiFetch(`/api/assessments/unit-standard/${unitStandardId}`),
 
-  // Get assessment by ID
+
   getAssessmentById: (id) =>
     apiFetch(`/api/assessments/${id}`),
 
   getEnrollmentCountByProgramId: (programId) =>
     apiFetch(`/api/enrollments/count/${programId}`),
 
+  getTest: (assessmentId) => apiFetch(`/api/assessments/${assessmentId}/learner`),
 
   getUserSubmission: (assessmentId) =>
     apiFetch(`/api/assessments/${assessmentId}/submission`),
@@ -125,9 +126,8 @@ export const assessmentService = {
     });
   },
 
-  // Submit text answer
-  submitTextAnswer: (assessmentId, answer) =>
-    apiFetch(`/api/assessments/${assessmentId}/submit-text`, {
+  submitTest: (assessmentId, answer) =>
+    apiFetch(`/api/assessments/${assessmentId}/submit-test`, {
       method: 'POST',
       body: JSON.stringify({ answer })
     }),

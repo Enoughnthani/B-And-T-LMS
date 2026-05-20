@@ -59,6 +59,9 @@ import ProgramManagement from "./components/program_manager/ProgramManagement";
 import ProgramView from "./components/program_manager/view/ProgramView";
 import StaffDashboard from "./components/staff/StaffDashboard";
 import DocumentAssessment from "./components/learner/assessment/DocumentAssessment";
+import TestStart from "./components/learner/assessment/write/TestStart";
+import TestTaking from "./components/learner/assessment/write/TestTaking";
+import TestComplete from "./components/learner/assessment/write/TestComplete";
 
 export default function App() {
 
@@ -191,7 +194,9 @@ export default function App() {
 
             <Route path="assessments" element={<LearnerAssessmentPage />} />
             <Route path="assessments/:id" element={<DocumentAssessment />} />
-            <Route path="assessments/:id/write" element={<WriteAssessment />} />
+            <Route path="assessments/:id/start" element={<TestStart />} />
+            <Route path="assessments/:id/write" element={<TestTaking />} />
+            <Route path="assessments/:id/submit" element={<TestComplete />} />
             
 
           </Route>

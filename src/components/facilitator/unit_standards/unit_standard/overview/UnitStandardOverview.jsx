@@ -1,13 +1,19 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import {
-    FaArrowLeft, FaStar, FaGraduationCap, FaCalendarAlt,
-    FaBook, FaClipboardList, FaFileAlt, FaVideo, FaLink,
-    FaEdit, FaTrash
-} from 'react-icons/fa';
-import { Button, Badge } from 'react-bootstrap';
 import { apiFetch } from '@/api/api';
-import { BASE_URL } from '@/utils/apiEndpoint';
+import { useEffect, useState } from 'react';
+import { Badge, Button } from 'react-bootstrap';
+import {
+    FaBook,
+    FaCalendarAlt,
+    FaClipboardList,
+    FaEdit,
+    FaFileAlt,
+    FaGraduationCap,
+    FaLink,
+    FaStar,
+    FaTrash,
+    FaVideo
+} from 'react-icons/fa';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 export default function UnitStandardOverview() {
     const { programId, unitStandardId } = useParams();
@@ -50,7 +56,7 @@ export default function UnitStandardOverview() {
     }
 
     return (
-        <div className="w-full bg-gray-50 min-h-screen">
+        <div className="w-full bg-gray-50 overflow-y-auto h-screen">
             <div className="px-6 py-6">
 
                 {/* Header Card */}

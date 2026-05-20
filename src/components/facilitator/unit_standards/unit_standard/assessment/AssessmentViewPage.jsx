@@ -252,8 +252,8 @@ export default function AssessmentViewPage() {
   const assessmentStatus = getAssessmentStatus();
 
   return (
-    <div className="overflow-y-auto h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <div className="w-full overflow-y-auto h-screen bg-gray-50">
+      <div className="px-4 sm:px-6 py-8">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}

@@ -74,6 +74,7 @@ export default function AssessmentFormPage() {
     try {
       const response = await assessmentService.getAssessmentById(assessmentId);
       const data = response?.payload || response;
+
       if (data) {
         setAssessmentInfo({
           title: data.title || '',
@@ -92,11 +93,12 @@ export default function AssessmentFormPage() {
             type: q.type,
             text: q.text,
             marks: q.marks,
+            blanks: q.blanks,
             explanation: q.explanation || '',
             options: q.options?.map(opt => typeof opt === 'object' ? opt.text : opt) || [],
             correctAnswer: q.correctAnswer,
             sampleAnswer: q.sampleAnswer,
-            pairs: q.matchingPairs?.map(pair => ({ left: pair.leftItem, right: pair.rightItem })) || []
+            pairs: q.pairs || []
           }));
           setQuestions(transformedQuestions);
           setQuestionCounts({
@@ -192,6 +194,7 @@ export default function AssessmentFormPage() {
         if (q.type === 'MATCHING') return { ...baseQuestion, matchingPairs: q.pairs.map((pair, pairIndex) => ({ leftItem: pair.left, rightItem: pair.right, displayOrder: pairIndex })) };
         if (q.type === 'TRUE_OR_FALSE') return { ...baseQuestion, correctAnswer: q.correctAnswer };
         if (q.type === 'LONG_QUESTION') return { ...baseQuestion, sampleAnswer: q.sampleAnswer || "" };
+        if (q.type === 'FILL_IN_BLANKS') return { ...baseQuestion, blanks: q.blanks || "" };
         return baseQuestion;
       });
 

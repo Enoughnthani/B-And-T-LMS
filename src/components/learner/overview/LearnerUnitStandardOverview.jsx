@@ -1,6 +1,6 @@
 import { apiFetch } from '@/api/api';
 import { useEffect, useState } from 'react';
-import { Badge, Button, ProgressBar } from 'react-bootstrap';
+import { Badge, Button, ProgressBar, Spinner } from 'react-bootstrap';
 import {
     FaArrowLeft,
     FaBook,
@@ -59,10 +59,10 @@ export default function LearnerUnitStandardOverview() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-screen bg-gray-50">
+            <div className="flex w-full items-center justify-center h-screen bg-gray-50">
                 <div className="text-center">
                     <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin mx-auto mb-3"></div>
-                    <p className="text-gray-500 text-sm">Loading...</p>
+                    <Spinner className='text-gray-600'/>
                 </div>
             </div>
         );

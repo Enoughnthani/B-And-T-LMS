@@ -1,14 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Card, Alert, Spinner, Badge, ProgressBar } from 'react-bootstrap';
-import { 
-  FaArrowLeft, FaDownload, FaPaperPlane, FaEye, FaRedo, FaClock, 
-  FaCalendarAlt, FaStar, FaCheckCircle, FaExclamationTriangle, 
-  FaInfoCircle, FaCheck, FaTimes, FaRegCircle, FaRegSquare
-} from 'react-icons/fa';
 import { assessmentService } from '@/components/facilitator/unit_standards/unit_standard/assessment/services/AssessmentService';
 import { useApiResponse } from '@/contexts/ApiResponseContext';
-import { BASE_URL } from '@/utils/apiEndpoint';
+import { useEffect, useState } from 'react';
+import { Alert, Badge, Button, Card, ProgressBar, Spinner } from 'react-bootstrap';
+import {
+  FaArrowLeft,
+  FaCalendarAlt,
+  FaCheck,
+  FaCheckCircle,
+  FaDownload,
+  FaExclamationTriangle,
+  FaPaperPlane,
+  FaRedo,
+  FaStar,
+  FaTimes
+} from 'react-icons/fa';
+import { useNavigate, useParams } from 'react-router-dom';
+
 
 export default function WriteAssessment() {
   const { id } = useParams();
@@ -53,7 +60,7 @@ export default function WriteAssessment() {
 
   const loadAssessment = async () => {
     try {
-      const response = await assessmentService.getAssessmentById(id);
+      const response = await assessmentService.getTest(id);
       const data = response?.payload || response;
       setAssessment(data);
     } catch (err) {
@@ -75,8 +82,8 @@ export default function WriteAssessment() {
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('en-US', { 
-      month: 'long', day: 'numeric', year: 'numeric' 
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric'
     });
   };
 
@@ -95,7 +102,7 @@ export default function WriteAssessment() {
     const now = new Date();
     const startDate = assessment.startDate ? new Date(assessment.startDate) : null;
     const dueDate = assessment.dueDate ? new Date(assessment.dueDate) : null;
-    
+
     if (dueDate && now > dueDate) {
       return { status: 'closed', label: 'Closed', color: 'danger', message: 'This assessment is closed' };
     }
@@ -116,10 +123,6 @@ export default function WriteAssessment() {
     }));
   };
 
-  // Helper to clean FILL_IN_BLANKS question text
-  const getDisplayText = (text) => {
-    return text.replace(/\[(.*?)\]/g, '__________');
-  };
 
   const renderQuestion = (question) => {
     const userAnswer = answers[question.id] || '';
@@ -130,21 +133,19 @@ export default function WriteAssessment() {
           <div className="flex gap-4 mt-3">
             <button
               onClick={() => handleAnswerChange(question.id, 'true')}
-              className={`px-6 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
-                userAnswer === 'true' 
-                  ? 'bg-blue-600 text-white' 
+              className={`px-6 py-2 rounded-lg font-medium transition flex items-center gap-2 ${userAnswer === 'true'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <FaCheck /> True
             </button>
             <button
               onClick={() => handleAnswerChange(question.id, 'false')}
-              className={`px-6 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
-                userAnswer === 'false' 
-                  ? 'bg-blue-600 text-white' 
+              className={`px-6 py-2 rounded-lg font-medium transition flex items-center gap-2 ${userAnswer === 'false'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <FaTimes /> False
             </button>
@@ -173,15 +174,34 @@ export default function WriteAssessment() {
       case 'FILL_IN_BLANKS':
         return (
           <div className="mt-3">
-            <p className="text-gray-800 mb-3 text-lg">{getDisplayText(question.text)}</p>
-            <input
-              type="text"
-              value={userAnswer}
-              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              placeholder="Type your answer here..."
-              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <p className="text-xs text-gray-400 mt-2">Enter the missing word/phrase</p>
+            <p className="text-gray-800 mb-4 text-lg">
+              {(() => {
+                const parts = question.text.split('___');
+                const blankCount = (question.text.match(/___/g) || []).length;
+
+                return parts.map((part, idx) => (
+                  <span key={idx}>
+                    {part}
+                    {idx < blankCount && (
+                      <input
+                        type="text"
+                        value={userAnswer?.[idx] || ''}
+                        onChange={(e) => {
+                          const newAnswers = [...(userAnswer || [])];
+                          newAnswers[idx] = e.target.value;
+                          handleAnswerChange(question.id, newAnswers);
+                        }}
+                        placeholder={`Blank ${idx + 1}`}
+                        className="mx-1 px-2 py-1 w-32 border-b-2 border-blue-400 focus:border-blue-600 outline-none text-center bg-transparent"
+                      />
+                    )}
+                  </span>
+                ));
+              })()}
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Fill in each blank above. Each blank is worth {question.marks / (question.blanksCount || 1)} mark(s).
+            </p>
           </div>
         );
 
@@ -213,14 +233,14 @@ export default function WriteAssessment() {
                   </div>
                 ))}
               </div>
-              
+
               {/* Right Column - Dropdowns */}
               <div className="space-y-3">
                 <h4 className="font-semibold text-gray-700 mb-2">Definition</h4>
                 {question.pairs?.map((pair, idx) => {
                   const currentMatch = matchingAnswers[question.id]?.[pair.left] || '';
                   const availableOptions = ['', ...question.pairs.map(p => p.right)];
-                  
+
                   return (
                     <select
                       key={pair.id}
@@ -268,11 +288,11 @@ export default function WriteAssessment() {
 
   const handleSubmit = async () => {
     const unansweredCount = assessment.questions.filter(q => !isQuestionAnswered(q)).length;
-    
+
     if (unansweredCount > 0) {
-      showResponse({ 
-        success: false, 
-        message: `Please answer all questions before submitting. ${unansweredCount} question(s) remaining.` 
+      showResponse({
+        success: false,
+        message: `Please answer all questions before submitting. ${unansweredCount} question(s) remaining.`
       });
       return;
     }
@@ -287,7 +307,7 @@ export default function WriteAssessment() {
         })),
         matchingAnswers: matchingAnswers
       };
-      
+
       const response = await assessmentService.submitTextAnswer(assessment.id, JSON.stringify(submissionData));
 
       if (response?.success) {
@@ -306,7 +326,7 @@ export default function WriteAssessment() {
   };
 
   const handleResubmit = () => setShowResubmitConfirm(true);
-  
+
   const handleConfirmResubmit = () => {
     setSubmitted(false);
     setExistingSubmission(null);
@@ -413,7 +433,7 @@ export default function WriteAssessment() {
     <div className="w-full overflow-y-auto h-screen bg-gray-50">
       <div className="px-4 py-8">
         {/* Header */}
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4">
+        <button onClick={() => navigate(-1)} className="flex bg-transparent items-center gap-2 text-gray-600 hover:text-gray-800 mb-4">
           <FaArrowLeft size={14} /> Back to Assessments
         </button>
 
@@ -480,13 +500,13 @@ export default function WriteAssessment() {
                 </Button>
               </div>
             </div>
-            
+
             <div className="p-6">
               <div className="mb-6">
                 <p className="text-gray-800 text-lg">{currentQ.text}</p>
                 {renderQuestion(currentQ)}
               </div>
-              
+
               {isQuestionAnswered(currentQ) && (
                 <div className="mt-4 pt-4 border-t">
                   <p className="text-sm text-green-600 flex items-center gap-1"><FaCheckCircle /> Answered</p>
@@ -503,10 +523,9 @@ export default function WriteAssessment() {
               <button
                 key={q.id}
                 onClick={() => setCurrentQuestion(idx)}
-                className={`w-8 h-8 rounded-full text-xs font-medium transition ${
-                  currentQuestion === idx ? 'bg-blue-600 text-white' :
-                  isQuestionAnswered(q) ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                }`}
+                className={`w-8 h-8 rounded-full text-xs font-medium transition ${currentQuestion === idx ? 'bg-blue-600 text-white' :
+                    isQuestionAnswered(q) ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                  }`}
               >
                 {idx + 1}
               </button>
@@ -526,7 +545,7 @@ export default function WriteAssessment() {
             {existingSubmission ? 'Resubmit Assessment' : 'Submit Assessment'}
           </Button>
         </div>
-        
+
         {getAnsweredCount() !== assessment.questions?.length && (
           <p className="text-xs text-amber-600 mt-2 text-right">
             {assessment.questions?.length - getAnsweredCount()} question(s) remaining

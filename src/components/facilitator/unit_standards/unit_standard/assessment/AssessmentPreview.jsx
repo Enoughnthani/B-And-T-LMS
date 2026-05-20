@@ -81,10 +81,19 @@ export default function AssessmentPreview({ assessmentInfo, questions }) {
               {question.type === 'FILL_IN_BLANKS' && (
                 <div className="mt-2 p-3 bg-white border border-gray-200 rounded">
                   <p className="text-sm text-gray-600">
-                    {question.text || '[Sentence with blanks]'}
+                    {question.text && question.text.split('___').map((part, idx) => (
+                      <span key={idx}>
+                        {part}
+                        {idx < (question.blanks?.length || 0) && (
+                          <span className="inline-block mx-1 px-2 py-0.5 bg-green-100 border border-green-300 rounded text-green-800 font-medium">
+                            {question.blanks[idx]}
+                          </span>
+                        )}
+                      </span>
+                    ))}
                   </p>
                   <div className="mt-2 text-xs text-gray-400">
-                    <em>Fill in the blanks input fields would appear here</em>
+                    <em>Correct answers shown in green</em>
                   </div>
                 </div>
               )}
