@@ -1,34 +1,14 @@
-import { useEffect, useState } from 'react';
-import {
-    Alert,
-    Badge,
-    Button,
-    Card,
-    Dropdown,
-    Form,
-    InputGroup,
-    Pagination,
-    ProgressBar,
-    Table
-} from 'react-bootstrap';
-import {
-    FaBook,
-    FaClock,
-    FaFilter,
-    FaGraduationCap,
-    FaMapMarkerAlt,
-    FaPlus,
-    FaSearch,
-    FaUsers,
-    FaUserTie
-} from 'react-icons/fa';
-
 import { apiFetch } from '@/api/api';
 import { PROGRAMS } from '@/utils/apiEndpoint';
+import { useEffect, useState } from 'react';
+import { Alert, Badge, Button, Card, Dropdown, Form, InputGroup } from 'react-bootstrap';
+import { FaBook, FaFilter, FaPlus, FaSearch, FaUserTie } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import DeleteProgramModal from './modals/DeleteProgramModal';
 import ProgramFiltersOffcanvas from './modals/ProgramFiltersOffcanvas';
 import ViewProgramModal from './modals/ViewModalProgram';
+import ProgramGrid from './grid-view/ProgramGrid';
+import ProgramList from './list-view/ProgramList';
 import { categories, statuses } from './utils/constants';
 
 export default function ProgramManagement() {
@@ -48,7 +28,7 @@ export default function ProgramManagement() {
         return localStorage.getItem("viewMode") || "list";
     });
     const [selectedProgram, setSelectedProgram] = useState(null);
-    const [respose, setResponse] = useState(null);
+    const [response, setResponse] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -59,14 +39,15 @@ export default function ProgramManagement() {
         const newMode = viewMode === "grid" ? "list" : "grid";
         setViewMode(newMode);
         localStorage.setItem("viewMode", newMode);
+        setCurrentPage(1); // Reset to first page when changing view mode
     };
 
     const getPrograms = async () => {
         try {
-            const result = await apiFetch(`${PROGRAMS}`, { method: 'GET', })
+            const result = await apiFetch(`${PROGRAMS}`, { method: 'GET' });
             setPrograms(result?.payload || []);
         } catch (error) {
-            setResponse({ success: false, message: 'Failed to fetch programs' })
+            setResponse({ success: false, message: 'Failed to fetch programs' });
         }
     }
 
@@ -81,7 +62,7 @@ export default function ProgramManagement() {
                 program.name.toLowerCase().includes(term) ||
                 program.description.toLowerCase().includes(term) ||
                 program.facilitator.toLowerCase().includes(term) ||
-                program.tags.some(tag => tag.toLowerCase().includes(term))
+                program.tags?.some(tag => tag.toLowerCase().includes(term))
             );
         }
 
@@ -112,8 +93,6 @@ export default function ProgramManagement() {
     }, [programs, searchTerm, selectedCategory, selectedStatus, selectedType, sortConfig]);
 
     const totalPages = Math.ceil(filteredPrograms.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentPrograms = filteredPrograms.slice(startIndex, startIndex + itemsPerPage);
 
     const handleSort = (key) => {
         setSortConfig(prev => ({
@@ -130,18 +109,14 @@ export default function ProgramManagement() {
         navigate(`${program?.id}/edit`, { state: { program } })
     };
 
-
-
     const handleDeleteProgram = (program) => {
         setSelectedProgram(program);
         setShowDeleteModal(true);
     };
 
-
     const getCategoryIcon = (category) => {
         const cat = categories.find(c => c.id === category);
         if (!cat) return <FaBook />;
-
         switch (cat.icon) {
             case 'FaBook': return <FaBook />;
             case 'FaUserTie': return <FaUserTie />;
@@ -158,8 +133,8 @@ export default function ProgramManagement() {
     const getStatusBadge = (status) => {
         const statusConfig = statuses.find(s => s.id === status);
         return (
-            <Badge bg={statusConfig?.color || 'secondary'} className="rounded-md w-[90px]">
-                {statusConfig?.label || status}
+            <Badge bg={statusConfig?.color || 'secondary'} className="rounded-md">
+                {statusConfig?.label || status?.replaceAll('_',' ')}
             </Badge>
         );
     };
@@ -181,27 +156,23 @@ export default function ProgramManagement() {
                 >
                     ACTION
                 </Dropdown.Toggle>
-
                 <Dropdown.Menu className="px-auto min-w-[140px] bg-slate-50 border border-gray-200 rounded-md shadow-lg">
                     {[
                         {
                             label: "VIEW",
-                            event: () => { navigate(`${program?.id}`) },
+                            event: () => navigate(`${program?.id}`),
                             style: "text-gray-800 hover:bg-gray-700",
                         },
-
                         {
                             label: "EDIT",
-                            event: () => { handleEditProgram(program) },
+                            event: () => handleEditProgram(program),
                             style: "text-yellow-800 hover:bg-yellow-700",
                         },
-
                         {
                             label: "DELETE",
-                            event: () => { handleDeleteProgram(program) },
+                            event: () => handleDeleteProgram(program),
                             style: "text-red-800 hover:bg-red-700",
                         },
-
                     ].map((action, idx) => (
                         <Dropdown.Item
                             key={idx}
@@ -233,7 +204,6 @@ export default function ProgramManagement() {
                 {/* Header */}
                 <div className="mb-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 items-start">
-                        {/* Left Section: Title & Welcome */}
                         <div className="space-y-3">
                             <div>
                                 <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
@@ -270,7 +240,7 @@ export default function ProgramManagement() {
                     </div>
                 </div>
 
-                {/* Alert */}
+             
                 {alert.show && (
                     <Alert
                         variant={alert.variant}
@@ -282,11 +252,7 @@ export default function ProgramManagement() {
                     </Alert>
                 )}
 
-                <div className='my-2 flex'>
-
-                </div>
-
-                {/* Search Bar */}
+           
                 <Card className="border-0 shadow-sm mb-6">
                     <Card.Body className="p-4">
                         <div className="flex gap-4">
@@ -298,7 +264,7 @@ export default function ProgramManagement() {
                                     placeholder="Search programs by name, description, or tags..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="border-l-0  "
+                                    className="border-l-0"
                                 />
                             </InputGroup>
                             {(selectedCategory !== 'all' || selectedStatus !== 'all' || selectedType !== 'all' || searchTerm) && (
@@ -310,203 +276,38 @@ export default function ProgramManagement() {
                     </Card.Body>
                 </Card>
 
-
-                {/* Programs Content */}
+               
                 {viewMode === 'grid' ? (
-                    // Grid View
-                    <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6">
-                            {currentPrograms.map(program => (
-                                <Card onClick={() => handleProgramClick(program)} key={program.id} className="cursor-pointer border-0 shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
-                                    <Card.Body className="p-4">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <div className={`w-10 h-10 bg-${getCategoryColor(program.category)}-100 rounded-lg flex items-center justify-center`}>
-                                                <div className={`text-${getCategoryColor(program.category)}-600`}>
-                                                    {getCategoryIcon(program.category)}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <h5 className="font-bold min-h-[2.5rem] text-gray-800 mb-2 line-clamp-2">{program.name}</h5>
-
-                                        <div className="space-y-3 mb-4">
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-gray-500 flex items-center gap-1">
-                                                    <FaUsers className="text-xs" /> {program?.category === 'INTERNSHIP' ? 'Interns' : 'Learners'}
-                                                </span>
-                                                <span className="font-medium">
-                                                    {program.enrolledCount}/{program.capacity}
-                                                </span>
-                                            </div>
-                                            <ProgressBar
-                                                now={(program.enrolledCount / program.capacity) * 100}
-                                                variant={getCategoryColor(program.category)}
-                                                className="h-1.5"
-                                            />
-
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-gray-500 flex items-center gap-1">
-                                                    <FaClock className="text-xs" /> Duration
-                                                </span>
-                                                <span className="font-medium">{program.duration}</span>
-                                            </div>
-
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-gray-500 flex items-center gap-1">
-                                                    <FaMapMarkerAlt className="text-xs" /> Location
-                                                </span>
-                                                <span className="font-medium">{program.location}</span>
-                                            </div>
-
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-gray-500">Status</span>
-                                                {getStatusBadge(program.status)}
-                                            </div>
-                                        </div>
-
-                                        {/* Action Buttons */}
-                                        <div className='w-32 me-auto'>
-                                            {getActions(program)}
-                                        </div>
-
-                                    </Card.Body>
-                                </Card>
-                            ))}
-                        </div>
-
-                        {filteredPrograms.length === 0 && (
-                            <div className="w-full text-center py-12">
-                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <FaBook className="text-gray-400 text-2xl" />
-                                </div>
-                                <h4 className="text-gray-700 font-medium mb-2">No programs found</h4>
-                                <p className="text-gray-500 mb-4">Try adjusting your filters or add a new program</p>
-                                <Button variant="primary" onClick={handleAddProgram}>
-                                    <FaPlus className="me-2" /> Add First Program
-                                </Button>
-                            </div>
-                        )}
-                    </>
+                    <ProgramGrid
+                        programs={filteredPrograms}
+                        currentPage={currentPage}
+                        itemsPerPage={itemsPerPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        onProgramClick={handleProgramClick}
+                        onAddProgram={handleAddProgram}
+                        getCategoryIcon={getCategoryIcon}
+                        getCategoryColor={getCategoryColor}
+                        getStatusBadge={getStatusBadge}
+                        getActions={getActions}
+                    />
                 ) : (
-                    // List View
-                    <Card className="border-0 shadow-sm p-1 rounded-lg">
-                        <Card.Body className="p-0">
-                            <div>
-                                {currentPrograms.length > 0 &&
-                                    <Table hover className="mb-0">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="border-0 px-4 py-3 text-gray-700 font-semibold cursor-pointer" onClick={() => handleSort('title')}>
-                                                    Program {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th className="border-0 px-4 py-3 text-gray-700 font-semibold cursor-pointer" onClick={() => handleSort('category')}>
-                                                    Category {sortConfig.key === 'category' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th className="border-0 px-4 py-3 text-gray-700 font-semibold cursor-pointer" onClick={() => handleSort('type')}>
-                                                    Type {sortConfig.key === 'type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th className="border-0 px-4 py-3 text-gray-700 font-semibold cursor-pointer" onClick={() => handleSort('status')}>
-                                                    Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th className="border-0 px-4 py-3 text-gray-700 font-semibold cursor-pointer" onClick={() => handleSort('learners')}>
-                                                    Learners {sortConfig.key === 'learners' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th className="border-0 px-4 py-3 text-gray-700 font-semibold">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {currentPrograms.map(program => (
-                                                <tr onClick={() => handleProgramClick(program)} key={program.id} className="cursor-pointer hover:bg-red-50/30 border-b border-gray-100">
-                                                    <td className="p-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`w-10 h-10 bg-${getCategoryColor(program.category)}-100 rounded-md flex items-center justify-center`}>
-                                                                <div className={`text-${getCategoryColor(program.category)}-600`}>
-                                                                    {getCategoryIcon(program.category)}
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <div className="font-medium text-gray-800">{program.name}</div>
-                                                                <div className="text-sm text-gray-600">{program.facilitator}</div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-4">
-                                                        <Badge bg="light" text="dark" className="border border-gray-200 px-3 py-1">
-                                                            {program.category === 'SHORT_COURSE' ? 'Short Course' :
-                                                                program.category === 'LEARNERSHIP' ? 'Learnership' : 'Internship'}
-                                                        </Badge>
-                                                    </td>
-
-                                                    <td className="p-4 ">
-                                                        {getTypeBadge(program.type)}
-                                                    </td>
-
-                                                    <td className="p-4 ">
-                                                        {getStatusBadge(program.status)}
-                                                    </td>
-                                                    <td className="p-4">
-                                                        <div>
-                                                            <div className="font-medium">{program?.enrolledCount}/{program.capacity}</div>
-                                                            <ProgressBar
-                                                                now={(program.enrolledCount) / program.capacity * 100}
-                                                                variant={getCategoryColor(program.category)}
-                                                                className="h-1 mt-1 w-24"
-                                                            />
-                                                        </div>
-                                                    </td>
-                                                    <td onClick={(e) => e.stopPropagation()} className="p-4">
-                                                        {getActions(program)}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </Table>
-                                }
-                            </div>
-
-
-                            {filteredPrograms.length === 0 && (
-                                <div className="text-center py-12">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <FaBook className="text-gray-400 text-2xl" />
-                                    </div>
-                                    <h4 className="text-gray-700 font-medium mb-2">No programs found</h4>
-                                    <p className="text-gray-500 mb-4">Try adjusting your filters or add a new program</p>
-                                    <Button variant="primary" onClick={handleAddProgram}>
-                                        <FaPlus className="me-2" /> Add First Program
-                                    </Button>
-                                </div>
-                            )}
-                        </Card.Body>
-                    </Card>
-                )}
-
-                {/* Pagination */}
-                {filteredPrograms.length > 0 && (
-                    <div className="mt-auto flex flex-col sm:flex-row items-center justify-between py-6 gap-4">
-                        <div className="text-sm text-gray-600">
-                            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredPrograms.length)} of {filteredPrograms.length} programs
-                        </div>
-                        <Pagination className="mb-0">
-                            <Pagination.Prev
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                            />
-                            {[...Array(totalPages)].map((_, idx) => (
-                                <Pagination.Item
-                                    key={idx + 1}
-                                    active={idx + 1 === currentPage}
-                                    onClick={() => setCurrentPage(idx + 1)}
-                                >
-                                    {idx + 1}
-                                </Pagination.Item>
-                            ))}
-                            <Pagination.Next
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                            />
-                        </Pagination>
-                    </div>
+                    <ProgramList
+                        programs={filteredPrograms}
+                        currentPage={currentPage}
+                        itemsPerPage={itemsPerPage}
+                        totalPages={totalPages}
+                        sortConfig={sortConfig}
+                        onSort={handleSort}
+                        onPageChange={setCurrentPage}
+                        onProgramClick={handleProgramClick}
+                        onAddProgram={handleAddProgram}
+                        getCategoryIcon={getCategoryIcon}
+                        getCategoryColor={getCategoryColor}
+                        getStatusBadge={getStatusBadge}
+                        getTypeBadge={getTypeBadge}
+                        getActions={getActions}
+                    />
                 )}
             </div>
 

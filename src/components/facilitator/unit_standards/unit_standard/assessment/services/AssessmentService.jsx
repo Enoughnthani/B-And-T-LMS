@@ -50,7 +50,6 @@ export const assessmentService = {
     });
   },
 
-  // Update assessment (with or without file)
   updateAssessment: (id, formData, onProgress) => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -82,15 +81,12 @@ export const assessmentService = {
     });
   },
 
-  // Delete assessment
   deleteAssessment: (id) =>
     apiFetch(`/api/assessments/${id}`, { method: 'DELETE' }),
 
-  // Get submissions for an assessment (facilitator view)
   getSubmissions: (assessmentId) =>
     apiFetch(`/api/assessments/${assessmentId}/submissions`),
 
-  // Submit assessment (file upload)
   submitAssessment: (file, assessmentId, onProgress) => {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
@@ -132,7 +128,6 @@ export const assessmentService = {
       body: JSON.stringify({ answer })
     }),
 
-  // Download assessment file with original name
   downloadAssessmentFile: (fileUrl, originalFileName) => {
     const filename = fileUrl.split('/').pop();
     const downloadUrl = `${BASE_URL}/uploads/assessments/${filename}/download?originalName=${encodeURIComponent(originalFileName)}`;

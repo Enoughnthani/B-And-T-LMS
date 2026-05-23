@@ -6,8 +6,8 @@ export const categories = [
 ];
 
 export const statuses = [
-    { id: 'NOTSTARTED', label: 'NOT STARTED', color: 'secondary' },
-    { id: 'INPROGRESS', label: 'IN PROGRESS', color: 'success' },
+    { id: 'NOT_STARTED', label: 'NOT STARTED', color: 'secondary' },
+    { id: 'IN_PROGRESS', label: 'IN PROGRESS', color: 'success' },
     { id: 'COMPLETED', label: 'COMPLETED', color: 'secondary' },
 ];
 
