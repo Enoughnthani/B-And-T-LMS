@@ -107,7 +107,7 @@ export default function LearnerAssessmentPage() {
                     )}
                   </div>
 
-                  {/* Meta Info */}
+              
                   <div className="space-y-1">
                     <p className="text-xs text-gray-500">
                       Submitted on <span className="text-gray-700 font-medium">{formatSubmissionDate(submission.submittedAt)}</span>
@@ -233,7 +233,7 @@ export default function LearnerAssessmentPage() {
               </Accordion.Header>
               <Accordion.Body className="p-3">
                 {assessments.test.map((item) => (
-                  <AssessmentItem path={`${item?.id}/write`} key={item.id} item={item} />
+                  <AssessmentItem path={`${item?.id}/start`} key={item.id} item={item} />
                 ))}
               </Accordion.Body>
             </Accordion.Item>

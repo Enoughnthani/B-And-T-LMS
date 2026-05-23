@@ -21,7 +21,6 @@ export default function TestStart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [existingSubmission, setExistingSubmission] = useState(null);
-  const { showResponse } = useApiResponse();
 
   useEffect(() => {
     loadTest();
@@ -106,7 +105,7 @@ export default function TestStart() {
   };
 
   const handleStartTest = () => {
-    navigate(`/learner/tests/${id}/take`);
+    navigate(`../assessments/${assessment?.id}/write`);
   };
 
   if (loading) {
