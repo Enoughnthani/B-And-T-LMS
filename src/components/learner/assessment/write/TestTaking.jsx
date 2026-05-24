@@ -65,6 +65,7 @@ export default function TestTaking() {
     saveAnswers(newAnswers, matchingAnswers);
   };
 
+
   const handleMatchingChange = (questionId, leftItem, rightValue) => {
     const newMatching = {
       ...matchingAnswers,
@@ -120,7 +121,7 @@ export default function TestTaking() {
           } else if (q.type === 'FILL_IN_BLANKS') {
             return {
               questionId: q.id,
-              answer: answers[q.id] || []
+              answers: answers[q.id] || []
             };
           } else {
             return {
@@ -135,17 +136,17 @@ export default function TestTaking() {
           answers: formattedAnswers
         };
 
-        const response = await assessmentService.submitTest(assessment.id, JSON.stringify(submissionData));
+        const response = await assessmentService.submitTest(assessment.id, submissionData);
         
         if (response?.success) {
           localStorage.removeItem(`test_answers_${id}`);
           showResponse({ success: true, message: 'Test submitted successfully!' });
-          navigate(`/learner/tests/${id}/complete`);
+          navigate(`../assessments/${id}/completed`);
         } else {
           showResponse({ success: false, message: 'Submission failed: ' + (response?.message || 'Unknown error') });
         }
       } catch (err) {
-        showResponse({ success: false, message: 'Failed to submit test' });
+        showResponse({ success: false, message: 'Failed to submit test '+err.message });
       } finally {
         setSubmitting(false);
       }

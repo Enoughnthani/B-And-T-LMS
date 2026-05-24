@@ -122,10 +122,10 @@ export const assessmentService = {
     });
   },
 
-  submitTest: (assessmentId, answer) =>
+  submitTest: (assessmentId, data) =>
     apiFetch(`/api/assessments/${assessmentId}/submit-test`, {
       method: 'POST',
-      body: JSON.stringify({ answer })
+      body: JSON.stringify(data)
     }),
 
   downloadAssessmentFile: (fileUrl, originalFileName) => {

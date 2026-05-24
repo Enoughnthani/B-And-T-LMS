@@ -17,6 +17,9 @@ export default function AssessmentViewPage() {
   const [validationErrors, setValidationErrors] = useState({});
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState(null);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [showMarkModal, setShowMarkModal] = useState(false);
+  const [markingData, setMarkingData] = useState({});
   const [statistics, setStatistics] = useState({
     totalSubmissions: 0,
     gradedCount: 0,
@@ -63,8 +66,8 @@ export default function AssessmentViewPage() {
     const reSubmitted = submissionsData.filter(s => s.status === 'RE_SUBMITTED').length;
 
     const scores = submissionsData
-      .filter(s => s.score != null)
-      .map(s => (s.score / (assessment?.totalMarks || 1)) * 100);
+      .filter(s => s.obtainedMarks != null)
+      .map(s => (s.obtainedMarks / (assessment?.totalMarks || 1)) * 100);
 
     const averageScore = scores.length > 0
       ? scores.reduce((a, b) => a + b, 0) / scores.length
@@ -83,57 +86,51 @@ export default function AssessmentViewPage() {
     });
   };
 
-  const validateDates = (startDate, dueDate) => {
-    const errors = {};
-
-    if (startDate && dueDate) {
-      const start = new Date(startDate);
-      const due = new Date(dueDate);
-
-      if (isAfter(start, due)) {
-        errors.dates = 'Start date cannot be after due date';
-      }
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (isBefore(start, today)) {
-        errors.startDate = 'Start date cannot be in the past';
-      }
-
-      if (isBefore(due, today)) {
-        errors.dueDate = 'Due date cannot be in the past';
-      }
+  const handleMarkSubmission = (submission) => {
+    setSelectedSubmission(submission);
+    
+    // Initialize marking data with existing marks
+    const initialMarks = {};
+    if (submission.questionAnswers) {
+      submission.questionAnswers.forEach(qa => {
+        if (qa.questionType === 'LONG_QUESTION') {
+          initialMarks[qa.questionId] = qa.marksObtained || 0;
+        }
+      });
     }
-
-    return errors;
+    setMarkingData(initialMarks);
+    setShowMarkModal(true);
   };
 
-  const handleUpdateAssessment = async () => {
-    setEditLoading(true);
-    setValidationErrors({});
-
-    const dateErrors = validateDates(editingAssessment.startDate, editingAssessment.dueDate);
-    if (Object.keys(dateErrors).length > 0) {
-      setValidationErrors(dateErrors);
-      setEditLoading(false);
-      return;
-    }
-
+  const handleSaveMarks = async () => {
     try {
-      const response = await assessmentService.updateAssessment(assessmentId, editingAssessment);
+      // Calculate total marks
+      let totalObtained = 0;
+      const updatedAnswers = selectedSubmission.questionAnswers.map(qa => {
+        if (qa.questionType === 'LONG_QUESTION') {
+          const newMarks = markingData[qa.questionId] || 0;
+          totalObtained += newMarks;
+          return { ...qa, marksObtained: newMarks };
+        }
+        totalObtained += qa.marksObtained || 0;
+        return qa;
+      });
+
+      const response = await assessmentService.gradeSubmission(selectedSubmission.id, {
+        obtainedMarks: totalObtained,
+        questionMarks: markingData
+      });
+
       if (response?.success) {
-        setShowEditModal(false);
-        await loadAssessment();
-        alert('Assessment updated successfully');
+        setShowMarkModal(false);
+        await loadSubmissions();
+        alert('Submission graded successfully');
       } else {
-        setValidationErrors({ submit: response?.message || 'Failed to update assessment' });
+        alert('Failed to grade submission');
       }
     } catch (err) {
-      console.error('Error updating assessment:', err);
-      setValidationErrors({ submit: err.message || 'An error occurred while updating' });
-    } finally {
-      setEditLoading(false);
+      console.error('Error grading submission:', err);
+      alert('Error grading submission');
     }
   };
 
@@ -151,12 +148,6 @@ export default function AssessmentViewPage() {
         <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
       </svg>
     );
-    if (ext === 'docx' || ext === 'doc') return (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-blue-500">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
-      </svg>
-    );
     return (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-500">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -167,31 +158,22 @@ export default function AssessmentViewPage() {
 
   const getStatusBadge = (status) => {
     const config = {
-      SUBMITTED: { label: "Submitted", color: "bg-sky-50 text-sky-700 border-sky-200" },
+      SUBMITTED: { label: "Pending", color: "bg-amber-50 text-amber-700 border-amber-200" },
       GRADED: { label: "Graded", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-      RE_SUBMITTED: { label: "Re-Submitted", color: "bg-amber-50 text-amber-700 border-amber-200" },
-      DEFAULT: { label: "Pending", color: "bg-gray-50 text-gray-600 border-gray-200" }
+      RE_SUBMITTED: { label: "Re-Submitted", color: "bg-sky-50 text-sky-700 border-sky-200" }
     };
 
-    const { label, color } = config[status] || config.DEFAULT;
+    const { label, color } = config[status] || config.SUBMITTED;
 
     return (
       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${color}`}>
-        {status === 'GRADED' ? (
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          {status === 'GRADED' ? (
             <path d="M5 13l4 4L19 7" />
-          </svg>
-        ) : status === 'RE_SUBMITTED' ? (
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M1 4v6h6M23 20v-6h-6" />
-            <path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15" />
-          </svg>
-        ) : (
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          ) : (
             <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-        )}
+          )}
+        </svg>
         {label}
       </span>
     );
@@ -199,7 +181,6 @@ export default function AssessmentViewPage() {
 
   const getAssessmentStatus = () => {
     if (!assessment) return null;
-
     const now = new Date();
     const startDate = assessment.startDate ? new Date(assessment.startDate) : null;
     const dueDate = assessment.dueDate ? new Date(assessment.dueDate) : null;
@@ -213,9 +194,68 @@ export default function AssessmentViewPage() {
     return { status: 'open', label: 'Open', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
   };
 
-  const handleDownloadAssessment = () => {
-    if (assessment?.fileUrl) {
-      assessmentService.downloadAssessmentFile(assessment.fileUrl, assessment.fileName || 'assessment');
+  const renderQuestionAnswerPreview = (question) => {
+    switch (question.questionType) {
+      case 'MULTIPLE_CHOICE':
+        return (
+          <div className="mt-2 pl-4 border-l-2 border-gray-200">
+            <p className="text-xs text-gray-500 mb-1">User Answer:</p>
+            <Badge className={question.userAnswer === question.correctAnswer ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+              {question.userAnswer || 'Not answered'}
+            </Badge>
+            <p className="text-xs text-gray-500 mt-2 mb-1">Correct Answer:</p>
+            <Badge className="bg-green-100 text-green-700">{question.correctAnswer}</Badge>
+          </div>
+        );
+      
+      case 'FILL_IN_BLANKS':
+        return (
+          <div className="mt-2 pl-4 border-l-2 border-gray-200">
+            <p className="text-xs text-gray-500 mb-1">User Answers:</p>
+            {question.userAnswers?.map((answer, idx) => (
+              <div key={idx} className="mb-1">
+                <span className="text-xs">Blank {idx + 1}: </span>
+                <Badge className={answer === question.correctAnswer.split(' | ')[idx] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                  {answer || 'Not answered'}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        );
+      
+      case 'MATCHING':
+        return (
+          <div className="mt-2 pl-4 border-l-2 border-gray-200">
+            <p className="text-xs text-gray-500 mb-1">Matches:</p>
+            {question.correctAnswer.split('; ').map((pair, idx) => {
+              const [left, right] = pair.split(' → ');
+              const userMatch = question.userMatchingAnswers?.[left];
+              return (
+                <div key={idx} className="text-xs mb-1">
+                  {left} → {userMatch || '?'} {userMatch === right ? '✓' : '✗'}
+                </div>
+              );
+            })}
+          </div>
+        );
+      
+      case 'LONG_QUESTION':
+        return (
+          <div className="mt-2 pl-4 border-l-2 border-gray-200">
+            <p className="text-xs text-gray-500 mb-1">User Answer:</p>
+            <div className="text-sm bg-gray-50 p-2 rounded">
+              {question.userAnswer || 'No answer provided'}
+            </div>
+            {question.marksObtained !== undefined && (
+              <div className="mt-2">
+                <p className="text-xs text-gray-500">Marks Given: {question.marksObtained}/{question.maxMarks}</p>
+              </div>
+            )}
+          </div>
+        );
+      
+      default:
+        return null;
     }
   };
 
@@ -250,6 +290,7 @@ export default function AssessmentViewPage() {
   }
 
   const assessmentStatus = getAssessmentStatus();
+  const isTest = assessment.type === 'TEST';
 
   return (
     <div className="w-full overflow-y-auto h-screen bg-gray-50">
@@ -271,7 +312,7 @@ export default function AssessmentViewPage() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap gap-2 mb-3">
                 <span className="px-2.5 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-md">
-                  {assessment.type === 'TEST' ? 'Test' : assessment.type || 'Assessment'}
+                  {isTest ? 'Test' : assessment.type || 'Assessment'}
                 </span>
                 {assessmentStatus && (
                   <span className={`px-2.5 py-0.5 text-xs font-medium rounded-md border ${assessmentStatus.color}`}>
@@ -421,7 +462,7 @@ export default function AssessmentViewPage() {
           </div>
         )}
 
-        {/* Custom Tabs */}
+        {/* Tabs */}
         <div className="mb-6">
           <div className="border-b border-gray-200">
             <div className="flex gap-1">
@@ -490,7 +531,7 @@ export default function AssessmentViewPage() {
                       <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
                           <th className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Learner</th>
-                          <th className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Submitted File</th>
+                          {!isTest && <th className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Submitted File</th>}
                           <th className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Submitted Date</th>
                           <th className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
                           <th className="text-left p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Score</th>
@@ -503,55 +544,117 @@ export default function AssessmentViewPage() {
                             <td className="p-4">
                               <div>
                                 <p className="font-medium text-gray-900 text-sm">
-                                  {submission.firstname} {submission.lastname}
+                                  {submission.userName || `${submission.firstname} ${submission.lastname}`}
                                 </p>
-                                <p className="text-xs text-gray-400">{submission.email}</p>
+                                <p className="text-xs text-gray-400">{submission.userEmail || submission.email}</p>
                               </div>
                             </td>
-                            <td className="p-4">
-                              <div className="flex items-center gap-2 min-w-0">
-                                {getFileIcon(submission.fileName)}
-                                <span className="text-sm text-gray-600 truncate max-w-[150px]">
-                                  {submission.fileName}
-                                </span>
-                              </div>
-                            </td>
+                            {!isTest && (
+                              <td className="p-4">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  {getFileIcon(submission.fileName)}
+                                  <span className="text-sm text-gray-600 truncate max-w-[150px]">
+                                    {submission.fileName}
+                                  </span>
+                                </div>
+                              </td>
+                            )}
                             <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
                               {format(parseISO(submission.submittedAt), 'PPP p')}
-                            </td>
+                             </td>
                             <td className="p-4">
                               {getStatusBadge(submission.status)}
-                            </td>
+                             </td>
                             <td className="p-4">
-                              {submission.score ? (
+                              {submission.obtainedMarks !== undefined ? (
+                                <div>
+                                  <span className="font-medium text-gray-900 text-sm">
+                                    {submission.obtainedMarks}/{submission.totalMarks || assessment.totalMarks}
+                                  </span>
+                                  <span className="text-xs text-gray-400 ml-1">
+                                    ({submission.percentageScore || Math.round((submission.obtainedMarks / (submission.totalMarks || assessment.totalMarks)) * 100)}%)
+                                  </span>
+                                </div>
+                              ) : submission.score ? (
                                 <span className="font-medium text-gray-900 text-sm">
                                   {submission.score}/{assessment.totalMarks}
                                 </span>
                               ) : (
                                 <span className="text-gray-400 text-sm">Not graded</span>
                               )}
-                            </td>
+                             </td>
                             <td className="p-4">
                               <div className="flex gap-2 flex-wrap">
-                                <button
-                                  onClick={() => window.open(BASE_URL + submission.fileUrl, '_blank')}
-                                  className="px-3 py-1.5 bg-sky-50 text-sky-700 rounded-md text-xs font-medium border border-sky-200 hover:bg-sky-100 flex items-center gap-1"
-                                >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                    <circle cx="12" cy="12" r="3" />
-                                  </svg>
-                                  Preview
-                                </button>
-                                <button
-                                  onClick={() => window.open(BASE_URL + submission.fileUrl, '_blank')}
-                                  className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-md text-xs font-medium border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1"
-                                >
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                                  </svg>
-                                  Download
-                                </button>
+                                {isTest && submission.questionAnswers ? (
+                                  <button
+                                    onClick={() => handleMarkSubmission(submission)}
+                                    className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-md text-xs font-medium border border-purple-200 hover:bg-purple-100 flex items-center gap-1"
+                                  >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                    </svg>
+                                    Grade
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => window.open(BASE_URL + submission.fileUrl, '_blank')}
+                                    className="px-3 py-1.5 bg-sky-50 text-sky-700 rounded-md text-xs font-medium border border-sky-200 hover:bg-sky-100 flex items-center gap-1"
+                                  >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                      <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                    Preview
+                                  </button>
+                                )}
+                                {submission.fileUrl && (
+                                  <button
+                                    onClick={() => window.open(BASE_URL + submission.fileUrl, '_blank')}
+                                    className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-md text-xs font-medium border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1"
+                                  >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                    </svg>
+                                    Download
+                                  </button>
+                                )}
+                                {isTest && submission.questionAnswers && (
+                                  <button
+                                    onClick={() => {
+                                      const previewWindow = window.open('', '_blank');
+                                      previewWindow.document.write(`
+                                        <html>
+                                          <head><title>Submission Preview - ${submission.userName}</title></head>
+                                          <body style="font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
+                                            <h1>Submission Details</h1>
+                                            <p><strong>Student:</strong> ${submission.userName}</p>
+                                            <p><strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
+                                            <p><strong>Score:</strong> ${submission.obtainedMarks}/${submission.totalMarks} (${submission.percentageScore}%)</p>
+                                            <h2>Answers:</h2>
+                                            ${submission.questionAnswers.map(qa => `
+                                              <div style="margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                                                <h3>${qa.questionText}</h3>
+                                                <p><strong>Type:</strong> ${qa.questionType}</p>
+                                                <p><strong>Marks:</strong> ${qa.marksObtained}/${qa.maxMarks}</p>
+                                                <p><strong>Your Answer:</strong> ${qa.userAnswer || qa.userAnswers?.join(', ') || JSON.stringify(qa.userMatchingAnswers)}</p>
+                                                <p><strong>Correct Answer:</strong> ${qa.correctAnswer}</p>
+                                              </div>
+                                            `).join('')}
+                                          </body>
+                                        </html>
+                                      `);
+                                      previewWindow.document.close();
+                                    }}
+                                    className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-md text-xs font-medium border border-gray-200 hover:bg-gray-100 flex items-center gap-1"
+                                  >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                      <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                    View Answers
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -565,6 +668,74 @@ export default function AssessmentViewPage() {
           </div>
         </div>
       </div>
+
+      {/* Mark Modal for Long Questions */}
+      {showMarkModal && selectedSubmission && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Grade Submission</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                {selectedSubmission.userName} - {selectedSubmission.userEmail}
+              </p>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {selectedSubmission.questionAnswers
+                .filter(qa => qa.questionType === 'LONG_QUESTION')
+                .map(qa => (
+                  <div key={qa.questionId} className="border border-gray-200 rounded-lg p-4">
+                    <div className="mb-3">
+                      <h4 className="font-medium text-gray-900">{qa.questionText}</h4>
+                      <span className="text-xs text-gray-500">Max Marks: {qa.maxMarks}</span>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-600 font-medium mb-1">Student's Answer:</p>
+                      <div className="bg-gray-50 rounded p-3 text-sm">
+                        {qa.userAnswer || 'No answer provided'}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-gray-600 font-medium mb-1 block">Marks Awarded:</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max={qa.maxMarks}
+                        value={markingData[qa.questionId] || 0}
+                        onChange={(e) => setMarkingData({
+                          ...markingData,
+                          [qa.questionId]: Math.min(parseInt(e.target.value) || 0, qa.maxMarks)
+                        })}
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
+                      />
+                    </div>
+                  </div>
+                ))}
+              
+              {selectedSubmission.questionAnswers.filter(qa => qa.questionType === 'LONG_QUESTION').length === 0 && (
+                <p className="text-gray-500 text-center py-4">No long questions to grade</p>
+              )}
+            </div>
+            
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={() => setShowMarkModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveMarks}
+                className="px-4 py-2 bg-slate-800 text-white rounded-md text-sm font-medium hover:bg-slate-700"
+              >
+                Save Marks
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

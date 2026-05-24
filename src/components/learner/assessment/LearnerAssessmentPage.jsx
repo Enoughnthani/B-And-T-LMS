@@ -51,7 +51,7 @@ export default function LearnerAssessmentPage() {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
-  const AssessmentItem = ({ item, path }) => {
+  const AssessmentItem = ({ item, path,resultsPath }) => {
     const hasSubmission = item.hasSubmission || false;
     const submission = item?.submission;
     const status = submission?.status;
@@ -107,7 +107,7 @@ export default function LearnerAssessmentPage() {
                     )}
                   </div>
 
-              
+
                   <div className="space-y-1">
                     <p className="text-xs text-gray-500">
                       Submitted on <span className="text-gray-700 font-medium">{formatSubmissionDate(submission.submittedAt)}</span>
@@ -127,7 +127,7 @@ export default function LearnerAssessmentPage() {
                 </div>
 
                 <Button
-                  onClick={() => navigate(`${item.id}`)}
+                  onClick={() => navigate(`${resultsPath || item.id}`)}
                   size="sm"
                   variant="outline-primary"
                   className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200"
@@ -233,7 +233,7 @@ export default function LearnerAssessmentPage() {
               </Accordion.Header>
               <Accordion.Body className="p-3">
                 {assessments.test.map((item) => (
-                  <AssessmentItem path={`${item?.id}/start`} key={item.id} item={item} />
+                  <AssessmentItem path={`${item?.id}/start`}  resultsPath={`${item?.id}/results`}  key={item.id} item={item} />
                 ))}
               </Accordion.Body>
             </Accordion.Item>
