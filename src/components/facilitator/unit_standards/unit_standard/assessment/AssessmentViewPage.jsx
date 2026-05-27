@@ -104,7 +104,6 @@ export default function AssessmentViewPage() {
 
   const handleSaveMarks = async () => {
     try {
-      // Calculate total marks
       let totalObtained = 0;
       const updatedAnswers = selectedSubmission.questionAnswers.map(qa => {
         if (qa.questionType === 'LONG_QUESTION') {

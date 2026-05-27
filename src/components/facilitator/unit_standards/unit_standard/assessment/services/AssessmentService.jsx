@@ -128,6 +128,12 @@ export const assessmentService = {
       body: JSON.stringify(data)
     }),
 
+  gradeSubmission: (submissionId, gradeData) =>
+    apiFetch(`/api/assessments/submissions/${submissionId}/grade`, {
+      method: 'POST',
+      body: JSON.stringify(gradeData)
+    }),
+
   downloadAssessmentFile: (fileUrl, originalFileName) => {
     const filename = fileUrl.split('/').pop();
     const downloadUrl = `${BASE_URL}/uploads/assessments/${filename}/download?originalName=${encodeURIComponent(originalFileName)}`;
