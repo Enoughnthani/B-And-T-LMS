@@ -123,6 +123,21 @@ export default function App() {
         }>
           <Route index element={<StaffDashboard />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="program-view/:programId" element={<FacilitatorProgramView />} >
+            <Route index element={<FacilitatorProgramOverview />} />
+            <Route path="unit-standards" element={<UnitStandardsPage />} />
+            <Route path="unit-standards/new" element={<UnitStandardFormPage />} />
+            <Route path="unit-standards/:id/edit" element={<UnitStandardFormPage />} />
+            <Route path="learners" element={<EnrolledLearnerView />} />
+          </Route>
+          <Route path="program-view/:programId/unit-standards/:unitStandardId" element={<UnitStandardLayout />} >
+            <Route index element={<UnitStandardOverview />} />
+            <Route path="content" element={<UnitStandardResources />} />
+            <Route path="assessments" element={<AssessmentPage />} />
+            <Route path="assessments/:assessmentId" element={<AssessmentViewPage />} />
+            <Route path="assessments/new" element={<AssessmentFormPage />} />
+            <Route path="assessments/:assessmentId/edit" element={<AssessmentFormPage />} />
+          </Route>
         </Route>
 
         {/*FACILITATOR ROUTES */}
@@ -199,7 +214,7 @@ export default function App() {
             <Route path="assessments/:id/write" element={<TestTaking />} />
             <Route path="assessments/:id/completed" element={<TestComplete />} />
             <Route path="assessments/:id/results" element={<TestResults />} />
-            
+
 
           </Route>
         </Route>
