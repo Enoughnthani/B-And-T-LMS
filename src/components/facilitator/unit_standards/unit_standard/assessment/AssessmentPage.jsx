@@ -6,6 +6,7 @@ import AssessmentCard from './AssessmentCard';
 import SubmissionsModal from './SubmissionsModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { assessmentService } from './services/assessmentService';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function FacilitatorAssessmentPage() {
   const { unitStandardId } = useParams();
@@ -17,6 +18,8 @@ export default function FacilitatorAssessmentPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const navigate = useNavigate();
+  const { userType } = useAuth()
+  const isFacilitator = userType === "FACILITATOR";
 
   useEffect(() => {
     loadAssessments();
@@ -81,18 +84,22 @@ export default function FacilitatorAssessmentPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Assessments</h1>
-            <p className="text-sm text-gray-500 mt-1">Create and manage learner assessments</p>
+            <p className="text-sm text-gray-500 mt-1">
+              {userType === 'FACILITATOR' && 'Create and manage learner assessments'}
+              {userType === 'ASSESSOR' && 'Review and evaluate learner assessments'}
+              {userType === 'MODERATOR' && 'Oversee and validate assessment results'}
+            </p>
           </div>
           <div className="flex gap-3">
-            {/* Quick Create - Simple form */}
-            <Button
+
+            {isFacilitator && <Button
               onClick={() => navigate(`new`)}
               variant="outline-primary"
               className='flex items-center gap-2 font-medium'
             >
               <FaPlus size={14} />
               <span>Create</span>
-            </Button>
+            </Button>}
           </div>
         </div>
 
@@ -117,48 +124,50 @@ export default function FacilitatorAssessmentPage() {
         >
 
           {/* Tests */}
-          <Accordion.Item eventKey="0" className="border border-gray-200 rounded overflow-hidden bg-white">
-            <Accordion.Header>
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
-                  <FaQuestionCircle className="text-green-600 text-sm" />
-                </div>
-                <span className="font-medium text-gray-800">Tests</span>
-                <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs">
-                  {filterItems(assessments.tests).length}
-                </span>
-              </div>
-            </Accordion.Header>
-            <Accordion.Body className="p-4 pt-0">
-              {filterItems(assessments.tests).length === 0 ? (
-                <div className="text-center py-10">
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FaQuestionCircle className="text-gray-400 text-lg" />
+          {userType === "FACILITATOR" &&
+            <Accordion.Item eventKey="0" className="border border-gray-200 rounded overflow-hidden bg-white">
+              <Accordion.Header>
+                <div className="flex items-center gap-3 w-full">
+                  <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+                    <FaQuestionCircle className="text-green-600 text-sm" />
                   </div>
-                  <p className="text-gray-400 text-sm">No tests found</p>
+                  <span className="font-medium text-gray-800">Quiz</span>
+                  <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs">
+                    {filterItems(assessments.tests).length}
+                  </span>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {filterItems(assessments.tests).map(item => (
-                    <AssessmentCard
-                      key={item.id}
-                      item={item}
-                      questions={item.questions}
+              </Accordion.Header>
+              <Accordion.Body className="p-4 pt-0">
+                {filterItems(assessments.tests).length === 0 ? (
+                  <div className="text-center py-10">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <FaQuestionCircle className="text-gray-400 text-lg" />
+                    </div>
+                    <p className="text-gray-400 text-sm">No quiz found</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filterItems(assessments.tests).map(item => (
+                      <AssessmentCard
+                        key={item.id}
+                        item={item}
+                        questions={item.questions}
 
-                      onViewSubmissions={() => {
-                        setSelectedAssessment(item);
-                        setShowSubmissionsModal(true);
-                      }}
-                      onDelete={() => {
-                        setEditingItem(item);
-                        setShowDeleteModal(true);
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </Accordion.Body>
-          </Accordion.Item>
+                        onViewSubmissions={() => {
+                          setSelectedAssessment(item);
+                          setShowSubmissionsModal(true);
+                        }}
+                        onDelete={() => {
+                          setEditingItem(item);
+                          setShowDeleteModal(true);
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </Accordion.Body>
+            </Accordion.Item>
+          }
 
           {/* Learner Workbooks */}
           <Accordion.Item eventKey="1" className="border border-gray-200 rounded overflow-hidden bg-white">

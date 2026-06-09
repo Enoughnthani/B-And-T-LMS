@@ -15,6 +15,7 @@ export default function UnitStandardLayout() {
   const location = useLocation()
   const { unitStandard } = location?.state || {}
   const {programId} = useParams()
+  const userType = user?.role[0]?.toLowerCase()
 
 
   return (
@@ -22,12 +23,12 @@ export default function UnitStandardLayout() {
 
       <aside className="hidden md:block min-w-[16rem] bg-white shadow-md border !border-gray-200 py-6 px-1.5 ">
         <div className="flex mx-2 items-center gap-3 pb-4">
-          <LogoImage onClick={()=>navigate('/user/facilitator')} />
+          <LogoImage onClick={()=>navigate(`/user/${userType}`)} />
         </div>
 
         <ul className="p-1">
           {[
-            { icon: <ArrowLeft size={20} className="text-blue-300" />, label: "Program View", path: `/user/facilitator/program-view/${unitStandard?.programId}`},
+            { icon: <ArrowLeft size={20} className="text-blue-300" />, label: "Program View", path: `/user/${userType}/program-view/${unitStandard?.programId}`},
             { icon: <FaChartLine size={20} className="text-blue-300" />, label: "Overview", path: '' },
             { icon: <FaFolder size={20} className="text-amber-300" />, label: "Content", path: 'content' },
             { icon: <ClipboardList size={20} className="text-green-300" />, label: "Assessements", path: 'assessments' },

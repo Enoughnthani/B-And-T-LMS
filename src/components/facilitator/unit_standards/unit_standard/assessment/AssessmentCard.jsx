@@ -2,6 +2,7 @@ import { FaCalendarAlt, FaChevronRight, FaDownload, FaEdit, FaEye, FaFileAlt, Fa
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { assessmentService } from "./services/AssessmentService"
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const getFileIcon = (fileName) => {
   if (!fileName) return null;
@@ -16,6 +17,7 @@ export default function AssessmentCard({ item, onViewSubmissions, onDelete }) {
   const [enrolledCount, setEnrolledCount] = useState(0);
   const { programId } = useParams()
   const location = useLocation()
+  const { userType } = useAuth()
 
   useEffect(() => {
     const getCount = async () => {
@@ -86,26 +88,29 @@ export default function AssessmentCard({ item, onViewSubmissions, onDelete }) {
                 Submissions
               </span>
             </button>
-            <button
-              onClick={() => navigate(`${item?.id}/edit`)}
-              className="relative group/btn p-2  text-amber-600 rounded-lg hover:bg-amber-50 transition-all duration-200"
-              title="Edit"
-            >
-              <FaEdit size={16} />
-              <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover/btn:opacity-100 transition whitespace-nowrap pointer-events-none">
-                Edit
-              </span>
-            </button>
-            <button
-              onClick={onDelete}
-              className="relative group/btn p-2 text-red-600 rounded-lg hover:bg-red-50 transition-all duration-200"
-              title="Delete"
-            >
-              <FaTrash size={16} />
-              <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover/btn:opacity-100 transition whitespace-nowrap pointer-events-none">
-                Delete
-              </span>
-            </button>
+            {userType==="FACILITATOR" && <>
+
+              <button
+                onClick={() => navigate(`${item?.id}/edit`)}
+                className="relative group/btn p-2  text-amber-600 rounded-lg hover:bg-amber-50 transition-all duration-200"
+                title="Edit"
+              >
+                <FaEdit size={16} />
+                <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover/btn:opacity-100 transition whitespace-nowrap pointer-events-none">
+                  Edit
+                </span>
+              </button>
+              <button
+                onClick={onDelete}
+                className="relative group/btn p-2 text-red-600 rounded-lg hover:bg-red-50 transition-all duration-200"
+                title="Delete"
+              >
+                <FaTrash size={16} />
+                <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover/btn:opacity-100 transition whitespace-nowrap pointer-events-none">
+                  Delete
+                </span>
+              </button>
+            </>}
           </div>
         </div>
 

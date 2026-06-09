@@ -88,14 +88,6 @@ export default function UnitStandardOverview() {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Button variant="outline-primary" size="sm" className="flex items-center gap-1">
-                                <FaEdit size={12} /> Edit
-                            </Button>
-                            <Button variant="outline-danger" size="sm" className="flex items-center gap-1">
-                                <FaTrash size={12} /> Delete
-                            </Button>
-                        </div>
                     </div>
                 </div>
 

@@ -225,7 +225,7 @@ export default function LearnerAssessmentPage() {
               <Accordion.Header>
                 <div className="flex items-center gap-2">
                   <FaGraduationCap className="text-red-500 text-sm" />
-                  <span className="font-semibold text-sm text-gray-700">Test</span>
+                  <span className="font-semibold text-sm text-gray-700">Quiz</span>
                   <Badge bg="secondary" className="ms-2 rounded-pill">
                     {assessments.test.length}
                   </Badge>

@@ -11,7 +11,6 @@ import {
   CREATE_ACCOUNT
 } from '@/utils/apiEndpoint'
 
-
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -19,6 +18,19 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { start, complete } = useTopLoader();
+  const [userType, setUserType] = useState(null);
+
+  // Update userType whenever user changes
+  useEffect(() => {
+    if (user?.role && Array.isArray(user.role) && user.role.length > 0) {
+      setUserType(user.role[0]);
+    } else if (user?.role && typeof user.role === 'string') {
+      // If role is a string instead of array
+      setUserType(user.role);
+    } else {
+      setUserType(null);
+    }
+  }, [user]);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -30,14 +42,25 @@ export const AuthProvider = ({ children }) => {
         const userData = await apiFetch(ME, {
           redirectErrors: false
         });
-        setUser(userData?.payload);
-        return { success: true, payload: userData?.payload };
+        const userPayload = userData?.payload;
+        setUser(userPayload);
+        
+        // Set userType from user role
+        if (userPayload?.role && Array.isArray(userPayload.role) && userPayload.role.length > 0) {
+          setUserType(userPayload.role[0]);
+        } else if (userPayload?.role && typeof userPayload.role === 'string') {
+          setUserType(userPayload.role);
+        }
+        
+        return { success: true, payload: userPayload };
       } else {
         setUser(null);
+        setUserType(null);
         return { success: false };
       }
     } catch (error) {
       setUser(null);
+      setUserType(null);
       return { success: false, message: error.data?.message };
     } finally {
       setLoading(false);
@@ -59,10 +82,12 @@ export const AuthProvider = ({ children }) => {
 
         if (!data?.success) {
           setUser(null);
+          setUserType(null);
           navigate('/session_expired', { replace: true });
         }
       } catch {
         setUser(null);
+        setUserType(null);
         navigate('/session_expired', { replace: true });
       }
     }, 15 * 60 * 1000);
@@ -70,7 +95,6 @@ export const AuthProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [user, navigate]);
 
-  
   const login = async ({ form }) => {
     start();
 
@@ -85,7 +109,15 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (data?.success || data?.payload) {
-        setUser(data?.payload || data);
+        const userData = data?.payload || data;
+        setUser(userData);
+        
+        // Set userType after login
+        if (userData?.role && Array.isArray(userData.role) && userData.role.length > 0) {
+          setUserType(userData.role[0]);
+        } else if (userData?.role && typeof userData.role === 'string') {
+          setUserType(userData.role);
+        }
       }
 
       return data;
@@ -131,12 +163,15 @@ export const AuthProvider = ({ children }) => {
 
       document.cookie = "JSESSIONID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       document.cookie = "remember-me=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      sessionStorage.clear()
+      sessionStorage.clear();
+      setUser(null);
+      setUserType(null);
       navigate('/', { replace: true });
     } catch (error) {
-    } finally {
       setUser(null);
+      setUserType(null);
       navigate('/', { replace: true });
+    } finally {
       complete();
     }
   };
@@ -144,6 +179,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       user,
+      userType, // Expose userType in context
       loading,
       login,
       register,

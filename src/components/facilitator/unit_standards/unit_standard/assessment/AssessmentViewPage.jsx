@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AssessmentPreview from './AssessmentPreview';
 import { assessmentService } from './services/assessmentService';
+import { Dropdown } from 'react-bootstrap';
 
 export default function AssessmentViewPage() {
   const { assessmentId } = useParams();
@@ -88,7 +89,7 @@ export default function AssessmentViewPage() {
 
   const handleMarkSubmission = (submission) => {
     setSelectedSubmission(submission);
-    
+
     // Initialize marking data with existing marks
     const initialMarks = {};
     if (submission.questionAnswers) {
@@ -206,7 +207,7 @@ export default function AssessmentViewPage() {
             <Badge className="bg-green-100 text-green-700">{question.correctAnswer}</Badge>
           </div>
         );
-      
+
       case 'FILL_IN_BLANKS':
         return (
           <div className="mt-2 pl-4 border-l-2 border-gray-200">
@@ -221,7 +222,7 @@ export default function AssessmentViewPage() {
             ))}
           </div>
         );
-      
+
       case 'MATCHING':
         return (
           <div className="mt-2 pl-4 border-l-2 border-gray-200">
@@ -237,7 +238,7 @@ export default function AssessmentViewPage() {
             })}
           </div>
         );
-      
+
       case 'LONG_QUESTION':
         return (
           <div className="mt-2 pl-4 border-l-2 border-gray-200">
@@ -252,7 +253,7 @@ export default function AssessmentViewPage() {
             )}
           </div>
         );
-      
+
       default:
         return null;
     }
@@ -277,8 +278,8 @@ export default function AssessmentViewPage() {
             </svg>
           </div>
           <p className="text-gray-500 mb-4">Assessment not found</p>
-          <button 
-            onClick={() => navigate(-1)} 
+          <button
+            onClick={() => navigate(-1)}
             className="px-4 py-2 bg-slate-800 text-white rounded-md text-sm font-medium hover:bg-slate-700"
           >
             Go Back
@@ -380,19 +381,6 @@ export default function AssessmentViewPage() {
                 )}
               </div>
             </div>
-
-            <div className="flex gap-2 shrink-0">
-              <button
-                onClick={() => navigate('edit')}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium flex items-center gap-2"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-                Edit
-              </button>
-            </div>
           </div>
         </div>
 
@@ -468,11 +456,10 @@ export default function AssessmentViewPage() {
               {assessment?.questions?.length > 0 && (
                 <button
                   onClick={() => setActiveTab('overview')}
-                  className={`px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${
-                    activeTab === 'overview'
+                  className={`px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === 'overview'
                       ? 'border-slate-800 text-slate-800'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -483,11 +470,10 @@ export default function AssessmentViewPage() {
               )}
               <button
                 onClick={() => setActiveTab('submissions')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${
-                  activeTab === 'submissions'
+                className={`px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === 'submissions'
                     ? 'border-slate-800 text-slate-800'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
@@ -511,7 +497,7 @@ export default function AssessmentViewPage() {
             )}
 
             {activeTab === 'submissions' && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 {submissions.length === 0 ? (
                   <div className="text-center py-16">
                     <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -525,7 +511,7 @@ export default function AssessmentViewPage() {
                     <p className="text-sm text-gray-400 mt-1">Learners haven't submitted this assessment</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <div className="">
                     <table className="w-full">
                       <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
@@ -560,10 +546,10 @@ export default function AssessmentViewPage() {
                             )}
                             <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
                               {format(parseISO(submission.submittedAt), 'PPP p')}
-                             </td>
+                            </td>
                             <td className="p-4">
                               {getStatusBadge(submission.status)}
-                             </td>
+                            </td>
                             <td className="p-4">
                               {submission.obtainedMarks !== undefined ? (
                                 <div>
@@ -581,79 +567,61 @@ export default function AssessmentViewPage() {
                               ) : (
                                 <span className="text-gray-400 text-sm">Not graded</span>
                               )}
-                             </td>
+                            </td>
                             <td className="p-4">
                               <div className="flex gap-2 flex-wrap">
-                                {isTest && submission.questionAnswers ? (
-                                  <button
-                                    onClick={() => handleMarkSubmission(submission)}
+                                <Dropdown>
+                                  <Dropdown.Toggle
+                                    as="button"
                                     className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-md text-xs font-medium border border-purple-200 hover:bg-purple-100 flex items-center gap-1"
                                   >
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                       <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                                       <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                     </svg>
-                                    Grade
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => window.open(BASE_URL + submission.fileUrl, '_blank')}
-                                    className="px-3 py-1.5 bg-sky-50 text-sky-700 rounded-md text-xs font-medium border border-sky-200 hover:bg-sky-100 flex items-center gap-1"
+                                    Actions
+                                  </Dropdown.Toggle>
+
+                                  <Dropdown.Menu
+                                    className="!rounded-lg !border-0 !shadow-lg mt-1 !min-w-[160px]"
+                                    style={{ borderRadius: '12px' }}
                                   >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                      <circle cx="12" cy="12" r="3" />
-                                    </svg>
-                                    Preview
-                                  </button>
-                                )}
-                                {submission.fileUrl && (
-                                  <button
-                                    onClick={() => window.open(BASE_URL + submission.fileUrl, '_blank')}
-                                    className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-md text-xs font-medium border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1"
-                                  >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                                    </svg>
-                                    Download
-                                  </button>
-                                )}
-                                {isTest && submission.questionAnswers && (
-                                  <button
-                                    onClick={() => {
-                                      const previewWindow = window.open('', '_blank');
-                                      previewWindow.document.write(`
-                                        <html>
-                                          <head><title>Submission Preview - ${submission.userName}</title></head>
-                                          <body style="font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
-                                            <h1>Submission Details</h1>
-                                            <p><strong>Student:</strong> ${submission.userName}</p>
-                                            <p><strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
-                                            <p><strong>Score:</strong> ${submission.obtainedMarks}/${submission.totalMarks} (${submission.percentageScore}%)</p>
-                                            <h2>Answers:</h2>
-                                            ${submission.questionAnswers.map(qa => `
-                                              <div style="margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-                                                <h3>${qa.questionText}</h3>
-                                                <p><strong>Type:</strong> ${qa.questionType}</p>
-                                                <p><strong>Marks:</strong> ${qa.marksObtained}/${qa.maxMarks}</p>
-                                                <p><strong>Your Answer:</strong> ${qa.userAnswer || qa.userAnswers?.join(', ') || JSON.stringify(qa.userMatchingAnswers)}</p>
-                                                <p><strong>Correct Answer:</strong> ${qa.correctAnswer}</p>
-                                              </div>
-                                            `).join('')}
-                                          </body>
-                                        </html>
-                                      `);
-                                      previewWindow.document.close();
-                                    }}
-                                    className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-md text-xs font-medium border border-gray-200 hover:bg-gray-100 flex items-center gap-1"
-                                  >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                      <circle cx="12" cy="12" r="3" />
-                                    </svg>
-                                    View Answers
-                                  </button>
-                                )}
+                                    {/* Menu items remain the same as above */}
+                                    <Dropdown.Item
+                                      onClick={() => handleMarkSubmission(submission)}
+                                      className="!px-4 !py-2 !text-sm hover:bg-purple-50"
+                                    >
+                                      Grade Submission
+                                    </Dropdown.Item>
+
+                                    <Dropdown.Divider className="!my-1" />
+
+                                    <Dropdown.Item
+                                      onClick={() => window.open(BASE_URL + submission.fileUrl, '_blank')}
+                                      className="!px-4 !py-2 !text-sm hover:bg-sky-50"
+                                    >
+                                      Preview File
+                                    </Dropdown.Item>
+
+                                    <Dropdown.Item
+                                      onClick={() => window.open(BASE_URL + submission.fileUrl, '_blank')}
+                                      className="!px-4 !py-2 !text-sm hover:bg-emerald-50"
+                                    >
+                                      Download File
+                                    </Dropdown.Item>
+
+                                    <Dropdown.Divider className="!my-1" />
+
+                                    <Dropdown.Item
+                                      onClick={() => {
+                                        // View answers logic
+                                      }}
+                                      className="!px-4 !py-2 !text-sm hover:bg-gray-50"
+                                    >
+                                      View All Answers
+                                    </Dropdown.Item>
+                                  </Dropdown.Menu>
+                                </Dropdown>
                               </div>
                             </td>
                           </tr>
@@ -678,7 +646,7 @@ export default function AssessmentViewPage() {
                 {selectedSubmission.userName} - {selectedSubmission.userEmail}
               </p>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {selectedSubmission.questionAnswers
                 .filter(qa => qa.questionType === 'LONG_QUESTION')
@@ -688,14 +656,14 @@ export default function AssessmentViewPage() {
                       <h4 className="font-medium text-gray-900">{qa.questionText}</h4>
                       <span className="text-xs text-gray-500">Max Marks: {qa.maxMarks}</span>
                     </div>
-                    
+
                     <div className="mb-3">
                       <p className="text-sm text-gray-600 font-medium mb-1">Student's Answer:</p>
                       <div className="bg-gray-50 rounded p-3 text-sm">
                         {qa.userAnswer || 'No answer provided'}
                       </div>
                     </div>
-                    
+
                     <div>
                       <label className="text-sm text-gray-600 font-medium mb-1 block">Marks Awarded:</label>
                       <input
@@ -712,12 +680,12 @@ export default function AssessmentViewPage() {
                     </div>
                   </div>
                 ))}
-              
+
               {selectedSubmission.questionAnswers.filter(qa => qa.questionType === 'LONG_QUESTION').length === 0 && (
                 <p className="text-gray-500 text-center py-4">No long questions to grade</p>
               )}
             </div>
-            
+
             <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
               <button
                 onClick={() => setShowMarkModal(false)}

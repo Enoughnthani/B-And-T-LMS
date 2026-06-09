@@ -17,7 +17,7 @@ export default function AssessmentInfoForm({ assessmentInfo, setAssessmentInfo, 
             >
               <option value="LEARNER_WORKBOOK">📘 Learner Workbook</option>
               <option value="SUMMATIVE">📋 Summative</option>
-              <option value="TEST">📝 Test</option>
+              <option value="TEST">📝 Quiz</option>
             </select>
           </div>
           <div>

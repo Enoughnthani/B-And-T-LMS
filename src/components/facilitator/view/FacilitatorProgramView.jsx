@@ -20,9 +20,10 @@ export default function FacilitatorProgramView() {
   const location = useLocation()
   const [program, setProgram] = useState(location?.state?.program)
   const { programId } = useParams()
+  const {user} = useAuth()
+  const userType = user?.role[0]?.toLowerCase()
 
   useEffect(() => {
-
     const getProgram = async () => {
       const data = await apiFetch(`/api/programs/${programId}`)
       setProgram(data?.payload)
@@ -34,13 +35,12 @@ export default function FacilitatorProgramView() {
 
   }, [location, programId])
 
-
   return (
     <div className="min-h-screen flex text-gray-800">
 
       <aside className="hidden md:block min-w-[16rem] bg-white shadow-md border !border-gray-200 py-6 px-1.5 ">
         <div className="flex mx-2 items-center gap-3 pb-4">
-          <LogoImage onClick={() => navigate('/user/facilitator')} />
+          <LogoImage onClick={() => navigate(`/user/${userType}`)} />
         </div>
 
         <div className="px-4">
@@ -51,8 +51,8 @@ export default function FacilitatorProgramView() {
 
         <ul className="p-1">
           {[
-            { icon: <Home size={20} className="text-zinc-500" />, label: "Home", path: '/user/facilitator' },
-            { icon: <ChartArea size={20} className="text-amber-500" />, label: "Overview", path: `/user/facilitator/program-view/${program?.id}` },
+            { icon: <Home size={20} className="text-zinc-500" />, label: "Home", path: `/user/${userType}` },
+            { icon: <ChartArea size={20} className="text-amber-500" />, label: "Overview", path: `/user/${userType}/program-view/${program?.id}` },
             { icon: <FaBook size={20} className="text-green-400" />, label: "Unit Standards", path: 'unit-standards' },
             { icon: <Users size={20} className="text-blue-300" />, label: "Learners", path: 'learners' },
 

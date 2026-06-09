@@ -272,8 +272,8 @@ export default function EnrolledLearnerView() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredLearners.map((learner) => (
-                    <tr key={learner.id} className="hover:bg-gray-50 transition group">
+                  {filteredLearners.map((learner,id) => (
+                    <tr key={id} className="hover:bg-gray-50 transition group">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-semibold ${
