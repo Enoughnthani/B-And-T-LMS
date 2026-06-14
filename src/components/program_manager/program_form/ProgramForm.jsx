@@ -1,18 +1,16 @@
 import { apiFetch } from '@/api/api';
+import ResponseMessage from '@/components/common/ResponseMessage';
 import RichTextEditor from '@/components/common/RichTextEditor';
+import { useApiResponse } from '@/contexts/ApiResponseContext';
 import { PROGRAMS } from '@/utils/apiEndpoint';
 import { ArrowLeft, Save, Upload } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Button, Form, Spinner } from 'react-bootstrap';
 import { FaBook, FaPenSquare } from 'react-icons/fa';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { programTypes } from '../utils/constants';
-import { useEffect, useState } from 'react';
-import ResponseMessage from '@/components/common/ResponseMessage';
-import { useApiResponse } from '@/contexts/ApiResponseContext';
-import { replace, useLocation, useNavigate } from 'react-router-dom';
 
-export default function ProgramForm({
-    getPrograms,
-}) {
+export default function ProgramForm({ getPrograms }) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState(null);
@@ -34,7 +32,6 @@ export default function ProgramForm({
         imageBlob: null
     });
 
-    // Set editing program and populate form when program is passed
     useEffect(() => {
         if (program) {
             setEditingProgram(program);
@@ -84,13 +81,30 @@ export default function ProgramForm({
         setFormData(prev => ({ ...prev, description: value }));
     };
 
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            category: '',
+            type: '',
+            description: '',
+            capacity: 30,
+            status: 'NOT_STARTED',
+            startDate: '',
+            endDate: '',
+            location: '',
+            imageBase64: '',
+            imageBlob: null
+        });
+        setEditingProgram(null);
+        setResponse(null);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             setLoading(true);
             
-            // Prepare data for API
             const submitData = {
                 name: formData.name,
                 category: formData.category,
@@ -112,11 +126,15 @@ export default function ProgramForm({
             showResponse(result);
             setResponse(result);
 
-            if (result?.success && editingProgram) {
+            if (result?.success) {
                 if (getPrograms) getPrograms();
-                resetForm();
+                
+                if (!editingProgram) {
+                    resetForm();
+                }
+                
                 setTimeout(() => {
-                    navigate(-1, { replace: true }); 
+                    navigate(-1, { replace: true });
                 }, 1500);
             }
         } catch (error) {
@@ -124,23 +142,6 @@ export default function ProgramForm({
         } finally {
             setLoading(false);
         }
-    };
-
-    const resetForm = () => {
-        setFormData({
-            name: '',
-            category: '',
-            type: '',
-            description: '',
-            capacity: 30,
-            status: 'NOT_STARTED',
-            startDate: '',
-            endDate: '',
-            location: '',
-            imageBase64: '',
-            imageBlob: null
-        });
-        setEditingProgram(null);
     };
 
     const handleCancel = () => {
@@ -151,7 +152,6 @@ export default function ProgramForm({
     return (
         <div className="border-gray-200 overflow-y-auto h-screen p-2">
             <div className="border bg-white rounded py-6 px-4 mx-auto">
-                {/* Header */}
                 <div className="mb-6">
                     <button
                         onClick={() => navigate(-1)}
@@ -178,14 +178,12 @@ export default function ProgramForm({
                     </div>
                 </div>
 
-                {/* Form Card */}
                 <div className="rounded-2xl overflow-hidden">
                     <div className="p-6">
                         <ResponseMessage setResponse={setResponse} response={response} />
 
                         <Form onSubmit={handleSubmit}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                {/* Program Name */}
                                 <Form.Group className="md:col-span-2">
                                     <Form.Label className="text-sm font-medium text-gray-700">Program Name</Form.Label>
                                     <Form.Control
@@ -199,7 +197,6 @@ export default function ProgramForm({
                                     />
                                 </Form.Group>
 
-                                {/* Category */}
                                 <Form.Group>
                                     <Form.Label className="text-sm font-medium text-gray-700">Category</Form.Label>
                                     <Form.Select
@@ -216,7 +213,6 @@ export default function ProgramForm({
                                     </Form.Select>
                                 </Form.Group>
 
-                                {/* Type */}
                                 <Form.Group>
                                     <Form.Label className="text-sm font-medium text-gray-700">Type</Form.Label>
                                     <Form.Select
@@ -235,7 +231,6 @@ export default function ProgramForm({
                                     </Form.Select>
                                 </Form.Group>
 
-                                {/* Capacity */}
                                 <Form.Group>
                                     <Form.Label className="text-sm font-medium text-gray-700">Capacity</Form.Label>
                                     <Form.Control
@@ -249,7 +244,6 @@ export default function ProgramForm({
                                     />
                                 </Form.Group>
 
-                                {/* Status */}
                                 <Form.Group>
                                     <Form.Label className="text-sm font-medium text-gray-700">Status</Form.Label>
                                     <Form.Select
@@ -265,7 +259,6 @@ export default function ProgramForm({
                                     </Form.Select>
                                 </Form.Group>
 
-                                {/* Location */}
                                 <Form.Group className="md:col-span-2">
                                     <Form.Label className="text-sm font-medium text-gray-700">Location</Form.Label>
                                     <Form.Control
@@ -277,7 +270,6 @@ export default function ProgramForm({
                                     />
                                 </Form.Group>
 
-                                {/* Start Date */}
                                 <Form.Group>
                                     <Form.Label className="text-sm font-medium text-gray-700">Start Date</Form.Label>
                                     <Form.Control
@@ -290,7 +282,6 @@ export default function ProgramForm({
                                     />
                                 </Form.Group>
 
-                                {/* End Date */}
                                 <Form.Group>
                                     <Form.Label className="text-sm font-medium text-gray-700">End Date</Form.Label>
                                     <Form.Control
@@ -303,7 +294,6 @@ export default function ProgramForm({
                                     />
                                 </Form.Group>
 
-                                {/* Description */}
                                 <Form.Group className="md:col-span-2">
                                     <Form.Label className="text-sm font-medium text-gray-700">Description</Form.Label>
                                     <RichTextEditor content={formData?.description} onChange={handleDescriptionChange} />
@@ -312,7 +302,6 @@ export default function ProgramForm({
                                     </Form.Text>
                                 </Form.Group>
 
-                                {/* Image Upload Section */}
                                 <Form.Group className="md:col-span-2">
                                     <Form.Label className="text-sm font-medium text-gray-700">Program Image</Form.Label>
                                     <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-blue-400 transition-colors bg-gray-50/30">
@@ -338,7 +327,6 @@ export default function ProgramForm({
                                             </span>
                                         </label>
 
-                                        {/* Image Preview */}
                                         {formData.imageBlob && (
                                             <div className="mt-4 relative inline-block">
                                                 <img
@@ -365,7 +353,6 @@ export default function ProgramForm({
                                 </Form.Group>
                             </div>
 
-                            {/* Action Buttons */}
                             <div className="border-t border-gray-100 pt-5 mt-5 flex justify-end gap-3">
                                 <Button
                                     variant="outline-secondary"

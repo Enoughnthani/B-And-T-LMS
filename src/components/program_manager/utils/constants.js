@@ -18,14 +18,9 @@ export const programTypes = [
     "HEALTHCARE",
     "EDUCATION",
     "FINANCE",
-    "LAW",
     "HOSPITALITY",
     "LOGISTICS",
     "CONSTRUCTION",
     "AGRICULTURE",
-    "MARKETING"
+    "MARKETING",
 ];
-
-//export const types = ['Technical', 'Design', 'Business', 'Marketing', 'Management', 'Executive'];
-export const locations = ['Online', 'On-site', 'Hybrid', 'Remote'];
-export const facilitators = ['Sarah Chen', 'Michael Rodriguez', 'Dr. Lisa Wang', 'Emma Wilson', 'James Brown', 'Alex Johnson', 'David Miller', 'Sophia Garcia'];

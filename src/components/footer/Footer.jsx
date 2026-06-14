@@ -2,6 +2,7 @@ import { Facebook, Instagram, Linkedin, Mail, Phone } from "lucide-react";
 import logo from "@/resources/logo.png";
 import { FaFacebook, FaWhatsapp } from "react-icons/fa";
 import { Button, Form } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
     return (
@@ -24,15 +25,13 @@ export default function Footer() {
                     <div>
                         <h3 className="text-lg font-semibold text-black mb-3">Quick Links</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><a href="#" className="hover:text-red-500 transition">Privacy</a></li>
-                            <li><a href="#" className="hover:text-red-500 transition">Policy</a></li>
-                            <li><a href="#" className="hover:text-red-500 transition">Login</a></li>
-                            <li><a href="#" className="hover:text-red-500 transition">Register</a></li>
-                            <li><a href="#" className="hover:text-red-500 transition">Help</a></li>
+                            <li><Link to="/privacy" className="hover:text-red-500 transition">Privacy</Link></li>
+                            <li><Link to="/policy" className="hover:text-red-500 transition">Policy</Link></li>
+                            <li><Link to="/login" className="hover:text-red-500 transition">Login</Link></li>
+                            <li><Link to="/help" className="hover:text-red-500 transition">Help</Link></li>
                         </ul>
                     </div>
 
-                    {/* Contact */}
                     <div>
                         <h3 className="text-lg font-semibold text-black mb-3">Contact Us</h3>
                         <ul className="space-y-2 text-sm">

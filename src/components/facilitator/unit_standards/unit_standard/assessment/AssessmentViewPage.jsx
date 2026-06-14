@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AssessmentPreview from './AssessmentPreview';
 import { assessmentService } from './services/assessmentService';
 import { Dropdown } from 'react-bootstrap';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AssessmentViewPage() {
   const { assessmentId } = useParams();
@@ -14,13 +15,10 @@ export default function AssessmentViewPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [error, setError] = useState(null);
-  const [editLoading, setEditLoading] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({});
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingAssessment, setEditingAssessment] = useState(null);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [showMarkModal, setShowMarkModal] = useState(false);
   const [markingData, setMarkingData] = useState({});
+  const { userType } = useAuth()
   const [statistics, setStatistics] = useState({
     totalSubmissions: 0,
     gradedCount: 0,
@@ -158,9 +156,11 @@ export default function AssessmentViewPage() {
 
   const getStatusBadge = (status) => {
     const config = {
-      SUBMITTED: { label: "Pending", color: "bg-amber-50 text-amber-700 border-amber-200" },
+      SUBMITTED: { label: "Submitted", color: "bg-amber-50 text-amber-700 border-amber-200" },
       GRADED: { label: "Graded", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-      RE_SUBMITTED: { label: "Re-Submitted", color: "bg-sky-50 text-sky-700 border-sky-200" }
+      RE_SUBMITTED: { label: "Re-Submitted", color: "bg-sky-50 text-sky-700 border-sky-200" },
+      APPROVED: { label: "Approved", color: "bg-green-50 text-green-700 border-green-200" },
+      REJECTED: { label: "Rejected", color: "bg-red-50 text-red-700 border-red-200" }
     };
 
     const { label, color } = config[status] || config.SUBMITTED;
@@ -168,7 +168,11 @@ export default function AssessmentViewPage() {
     return (
       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${color}`}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          {status === 'GRADED' ? (
+          {status === 'APPROVED' ? (
+            <path d="M5 13l4 4L19 7" />
+          ) : status === 'REJECTED' ? (
+            <path d="M6 18L18 6M6 6l12 12" />
+          ) : status === 'GRADED' ? (
             <path d="M5 13l4 4L19 7" />
           ) : (
             <circle cx="12" cy="12" r="10" />
@@ -422,7 +426,7 @@ export default function AssessmentViewPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wider">Average Score</p>
-                  <p className="text-2xl font-bold text-slate-700 mt-1">{statistics.averageScore}%</p>
+                  <p className="text-2xl font-bold text-slate-700 mt-1">{0}%</p>
                 </div>
                 <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-500">
@@ -457,8 +461,8 @@ export default function AssessmentViewPage() {
                 <button
                   onClick={() => setActiveTab('overview')}
                   className={`px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === 'overview'
-                      ? 'border-slate-800 text-slate-800'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-slate-800 text-slate-800'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -471,8 +475,8 @@ export default function AssessmentViewPage() {
               <button
                 onClick={() => setActiveTab('submissions')}
                 className={`px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === 'submissions'
-                    ? 'border-slate-800 text-slate-800'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-slate-800 text-slate-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -586,13 +590,33 @@ export default function AssessmentViewPage() {
                                     className="!rounded-lg !border-0 !shadow-lg mt-1 !min-w-[160px]"
                                     style={{ borderRadius: '12px' }}
                                   >
-                                    {/* Menu items remain the same as above */}
-                                    <Dropdown.Item
-                                      onClick={() => handleMarkSubmission(submission)}
-                                      className="!px-4 !py-2 !text-sm hover:bg-purple-50"
-                                    >
-                                      Grade Submission
-                                    </Dropdown.Item>
+                                    {userType === "ASSESSOR" &&
+                                      <Dropdown.Item
+                                        onClick={() => navigate(`grade`, { state: { submission } })}
+                                        className="!px-4 !py-2 !text-sm hover:bg-purple-50"
+                                      >
+                                        Grade Submission
+                                      </Dropdown.Item>}
+
+                                    {userType === "MODERATOR" &&
+                                      <Dropdown.Item
+                                        onClick={() => navigate(`moderate`, { state: { submission } })}
+                                        className="!px-4 !py-2 !text-sm hover:bg-purple-50"
+                                      >
+                                        Moderate Submission
+                                      </Dropdown.Item>
+                                    }
+
+                                    {userType === "FACILITATOR" && assessment?.type=="QUIZ" &&
+                                      <Dropdown.Item
+                                        onClick={() => handleMarkSubmission(submission)}
+                                        className="!px-4 !py-2 !text-sm hover:bg-purple-50"
+                                      >
+                                        Mark Submission
+                                      </Dropdown.Item>
+                                    }
+
+
 
                                     <Dropdown.Divider className="!my-1" />
 
@@ -614,7 +638,6 @@ export default function AssessmentViewPage() {
 
                                     <Dropdown.Item
                                       onClick={() => {
-                                        // View answers logic
                                       }}
                                       className="!px-4 !py-2 !text-sm hover:bg-gray-50"
                                     >

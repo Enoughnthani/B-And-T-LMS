@@ -1,5 +1,7 @@
+import { apiFetch } from '@/api/api';
+import { ADMIN } from '@/utils/apiEndpoint';
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import {
   FaBan,
@@ -23,6 +25,21 @@ const AdminActivities = () => {
   const location = useLocation()
   const initialActivities = location?.state?.activities;
   const [activities, setActivities] = useState(initialActivities || [])
+
+  useEffect(() => {
+    getActivities()
+  }, [])
+
+  async function getActivities() {
+    try {
+      const result = await apiFetch(`${ADMIN}/activities`)
+      if (result?.success) {
+        setActivities(result?.payload)
+      }
+    } catch (e) {
+      console.log(e.message)
+    }
+  }
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAction, setFilterAction] = useState('ALL');
@@ -348,8 +365,8 @@ const AdminActivities = () => {
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
                       className={`min-w-[36px] px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${currentPage === pageNum
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                         }`}
                     >
                       {pageNum}

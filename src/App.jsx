@@ -63,191 +63,180 @@ import TestStart from "./components/learner/assessment/write/TestStart";
 import TestTaking from "./components/learner/assessment/write/TestTaking";
 import TestComplete from "./components/learner/assessment/write/TestComplete";
 import TestResults from "./components/learner/assessment/write/TestResults";
+import AssessorGradePage from "./components/staff/grade_subission/AssessorGradePage";
+import ModeratorReviewPage from "./components/staff/grade_subission/ModeratorReviewPage";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import VerifyOTP from "./components/auth/VerifyOTP";
+import ResetPassword from "./components/auth/ResetPassword";
+import Privacy from "./components/common/Privacy";
+import Policy from "./components/common/Policy";
+import Help from "./components/common/Help";
 
 export default function App() {
-
   return (
     <Container fluid className="p-0">
       <Routes>
-        {/*ADMIN ROUTES */}
-        <Route path={ROUTES.ADMIN} element={
-          <ProtectedRoute role="ADMIN">
-            <AdminDashboard />
-          </ProtectedRoute>
-        }>
-          <Route index element={<AdminDashboardOverview />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="users/new" element={<UserFormPage />} />
-          <Route path="users/new/bulk" element={<BulkUploadPage />} />
-          <Route path="users/:id/edit" element={<UserFormPage />} />
-          <Route path="users/:userId/role-manager" element={<RoleManagerPage />} />
-          <Route path="users/:id" element={<UserProfilePage />} />
-          <Route path="settings" element={<AdminProfile />} />
-          <Route path="activities" element={<AdminActivities />} />
-          <Route path="notifications" element={<NotificationPage />} />
-          <Route path="help" element={<HelpPage />} />
-        </Route>
-
-        {/*PROGRAM MANEGR ROUTES */}
-        <Route path={ROUTES.PROGRAM_MANGER} element={
-          <ProtectedRoute role="PROGRAM_MANAGER">
-            <ProgramLayout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<ProgramManagementOverview />} />
-          <Route path="programs" element={<ProgramManagement />} />
-          <Route path="programs/:id" element={<ProgramView />} />
-          <Route path="program/analytics/:id" element={<ProgramAnalyticsPage />} />
-          <Route path="profile" element={<ProgramManagerProfile />} />
-          <Route path="programs/new" element={<ProgramForm />} />
-          <Route path="programs/:id/edit" element={<ProgramForm />} />
-        </Route>
-
-        {/*MODERATOR ROUTES */}
-        <Route path={ROUTES.MODERATOR} element={
-          <ProtectedRoute role="MODERATOR">
-            <Layout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<StaffDashboard />} />
-          <Route path="program-view/:id" element={<ModeratorProgramView />} />
-          <Route path="learner/:learnerId" element={<ModeratorLearnerView />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="program-view/:programId" element={<FacilitatorProgramView />} >
-            <Route index element={<FacilitatorProgramOverview />} />
-            <Route path="unit-standards" element={<UnitStandardsPage />} />
-            <Route path="unit-standards/new" element={<UnitStandardFormPage />} />
-            <Route path="unit-standards/:id/edit" element={<UnitStandardFormPage />} />
-            <Route path="learners" element={<EnrolledLearnerView />} />
-          </Route>
-          <Route path="program-view/:programId/unit-standards/:unitStandardId" element={<UnitStandardLayout />} >
-            <Route index element={<UnitStandardOverview />} />
-            <Route path="content" element={<UnitStandardResources />} />
-            <Route path="assessments" element={<AssessmentPage />} />
-            <Route path="assessments/:assessmentId" element={<AssessmentViewPage />} />
-            <Route path="assessments/new" element={<AssessmentFormPage />} />
-            <Route path="assessments/:assessmentId/edit" element={<AssessmentFormPage />} />
+        {/* ADMIN ROUTES */}
+        <Route element={<ProtectedRoute role="ADMIN" />}>
+          <Route path={ROUTES.ADMIN} element={<AdminDashboard />}>
+            <Route index element={<AdminDashboardOverview />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="users/new" element={<UserFormPage />} />
+            <Route path="users/new/bulk" element={<BulkUploadPage />} />
+            <Route path="users/:id/edit" element={<UserFormPage />} />
+            <Route path="users/:userId/role-manager" element={<RoleManagerPage />} />
+            <Route path="users/:id" element={<UserProfilePage />} />
+            <Route path="settings" element={<ProfilePage />} />
+            <Route path="activities" element={<AdminActivities />} />
+            <Route path="notifications" element={<NotificationPage />} />
+            <Route path="help" element={<HelpPage />} />
           </Route>
         </Route>
 
-        {/*ASSESSOR ROUTES */}
-        <Route path={ROUTES.ACCESSOR} element={
-          <ProtectedRoute role="ASSESSOR">
-            <Layout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<StaffDashboard />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="program-view/:programId" element={<FacilitatorProgramView />} >
-            <Route index element={<FacilitatorProgramOverview />} />
-            <Route path="unit-standards" element={<UnitStandardsPage />} />
-            <Route path="unit-standards/new" element={<UnitStandardFormPage />} />
-            <Route path="unit-standards/:id/edit" element={<UnitStandardFormPage />} />
-            <Route path="learners" element={<EnrolledLearnerView />} />
-          </Route>
-          <Route path="program-view/:programId/unit-standards/:unitStandardId" element={<UnitStandardLayout />} >
-            <Route index element={<UnitStandardOverview />} />
-            <Route path="content" element={<UnitStandardResources />} />
-            <Route path="assessments" element={<AssessmentPage />} />
-            <Route path="assessments/:assessmentId" element={<AssessmentViewPage />} />
-            <Route path="assessments/new" element={<AssessmentFormPage />} />
-            <Route path="assessments/:assessmentId/edit" element={<AssessmentFormPage />} />
+        {/* PROGRAM MANAGER ROUTES */}
+        <Route element={<ProtectedRoute role="PROGRAM_MANAGER" />}>
+          <Route path={ROUTES.PROGRAM_MANGER} element={<ProgramLayout />}>
+            <Route index element={<ProgramManagementOverview />} />
+            <Route path="programs" element={<ProgramManagement />} />
+            <Route path="programs/:id" element={<ProgramView />} />
+            <Route path="program/analytics/:id" element={<ProgramAnalyticsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="programs/new" element={<ProgramForm />} />
+            <Route path="programs/:id/edit" element={<ProgramForm />} />
           </Route>
         </Route>
 
-        {/*FACILITATOR ROUTES */}
-        <Route path={ROUTES.FACILITATOR} element={
-          <ProtectedRoute role="FACILITATOR">
-            <Layout />
-          </ProtectedRoute>
-        } >
-
-          <Route index element={<StaffDashboard />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="program-view/:programId" element={<FacilitatorProgramView />} >
-            <Route index element={<FacilitatorProgramOverview />} />
-            <Route path="unit-standards" element={<UnitStandardsPage />} />
-            <Route path="unit-standards/new" element={<UnitStandardFormPage />} />
-            <Route path="unit-standards/:id/edit" element={<UnitStandardFormPage />} />
-            <Route path="learners" element={<EnrolledLearnerView />} />
-          </Route>
-          <Route path="program-view/:programId/unit-standards/:unitStandardId" element={<UnitStandardLayout />} >
-            <Route index element={<UnitStandardOverview />} />
-            <Route path="content" element={<UnitStandardResources />} />
-            <Route path="assessments" element={<AssessmentPage />} />
-            <Route path="assessments/:assessmentId" element={<AssessmentViewPage />} />
-            <Route path="assessments/new" element={<AssessmentFormPage />} />
-            <Route path="assessments/:assessmentId/edit" element={<AssessmentFormPage />} />
-          </Route>
-        </Route>
-
-        {/*MENTOR ROUTES */}
-        <Route path={ROUTES.MENTOR} element={
-          <ProtectedRoute role="MENTOR">
-            <Layout />
-          </ProtectedRoute>
-        } >
-
-          <Route index element={<MentorPage />} />
-          <Route path="program-view/:programId" element={<MentorProgramView />} >
-            <Route index element={<ProgramOverview />} />
-            <Route path='interns' element={<InternsList />} />
-            <Route path="interns/:internId" element={<InternReports />} />
-          </Route>
-          <Route path="profile" element={<ProfilePage />} />
-        </Route>
-
-        {/*INTERN ROUTES */}
-        <Route path={ROUTES.INTERN} element={
-          <ProtectedRoute role="INTERN">
-            <InternPage />
-          </ProtectedRoute>
-        } >
-          <Route index element={<InternOverview />} />
-          <Route path="reports" element={<InternReportPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-        </Route>
-
-        {/*LEARNER ROUTES */}
-        <Route path={ROUTES.LEARNER}
-          element={
-            <ProtectedRoute role="LEARNER">
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<LearnerDashboard />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="unit-standard/:unitStandardId" element={<CourseViewPage />} >
-
-            <Route index element={<LearnerUnitStandardOverview />} />
-            <Route path="content" element={<ContentPage />} />
-
-            <Route path="assessments" element={<LearnerAssessmentPage />} />
-            <Route path="assessments/:id" element={<DocumentAssessment />} />
-            <Route path="assessments/:id/start" element={<TestStart />} />
-            <Route path="assessments/:id/write" element={<TestTaking />} />
-            <Route path="assessments/:id/completed" element={<TestComplete />} />
-            <Route path="assessments/:id/results" element={<TestResults />} />
-
-
+        {/* MODERATOR ROUTES */}
+        <Route element={<ProtectedRoute role="MODERATOR" />}>
+          <Route path={ROUTES.MODERATOR} element={<Layout />}>
+            <Route index element={<StaffDashboard />} />
+            <Route path="program-view/:id" element={<ModeratorProgramView />} />
+            <Route path="learner/:learnerId" element={<ModeratorLearnerView />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="program-view/:programId" element={<FacilitatorProgramView />}>
+              <Route index element={<FacilitatorProgramOverview />} />
+              <Route path="unit-standards" element={<UnitStandardsPage />} />
+              <Route path="unit-standards/new" element={<UnitStandardFormPage />} />
+              <Route path="unit-standards/:id/edit" element={<UnitStandardFormPage />} />
+              <Route path="learners" element={<EnrolledLearnerView />} />
+            </Route>
+            <Route path="program-view/:programId/unit-standards/:unitStandardId" element={<UnitStandardLayout />}>
+              <Route index element={<UnitStandardOverview />} />
+              <Route path="content" element={<UnitStandardResources />} />
+              <Route path="assessments" element={<AssessmentPage />} />
+              <Route path="assessments/:assessmentId" element={<AssessmentViewPage />} />
+              <Route path="assessments/:assessmentId/moderate" element={<ModeratorReviewPage />} />
+              <Route path="assessments/new" element={<AssessmentFormPage />} />
+              <Route path="assessments/:assessmentId/edit" element={<AssessmentFormPage />} />
+            </Route>
           </Route>
         </Route>
 
+        {/* ASSESSOR ROUTES */}
+        <Route element={<ProtectedRoute role="ASSESSOR" />}>
+          <Route path={ROUTES.ACCESSOR} element={<Layout />}>
+            <Route index element={<StaffDashboard />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="program-view/:programId" element={<FacilitatorProgramView />}>
+              <Route index element={<FacilitatorProgramOverview />} />
+              <Route path="unit-standards" element={<UnitStandardsPage />} />
+              <Route path="unit-standards/new" element={<UnitStandardFormPage />} />
+              <Route path="unit-standards/:id/edit" element={<UnitStandardFormPage />} />
+              <Route path="learners" element={<EnrolledLearnerView />} />
+            </Route>
+            <Route path="program-view/:programId/unit-standards/:unitStandardId" element={<UnitStandardLayout />}>
+              <Route index element={<UnitStandardOverview />} />
+              <Route path="content" element={<UnitStandardResources />} />
+              <Route path="assessments" element={<AssessmentPage />} />
+              <Route path="assessments/:assessmentId" element={<AssessmentViewPage />} />
+              <Route path="assessments/:assessmentId/grade" element={<AssessorGradePage />} />
+              <Route path="assessments/new" element={<AssessmentFormPage />} />
+              <Route path="assessments/:assessmentId/edit" element={<AssessmentFormPage />} />
+            </Route>
+          </Route>
+        </Route>
 
-        {/*PUBLIC ROUTES */}
-        <Route path="/" element={<PublicLayout />} >
+        {/* FACILITATOR ROUTES */}
+        <Route element={<ProtectedRoute role="FACILITATOR" />}>
+          <Route path={ROUTES.FACILITATOR} element={<Layout />}>
+            <Route index element={<StaffDashboard />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="program-view/:programId" element={<FacilitatorProgramView />}>
+              <Route index element={<FacilitatorProgramOverview />} />
+              <Route path="unit-standards" element={<UnitStandardsPage />} />
+              <Route path="unit-standards/new" element={<UnitStandardFormPage />} />
+              <Route path="unit-standards/:id/edit" element={<UnitStandardFormPage />} />
+              <Route path="learners" element={<EnrolledLearnerView />} />
+            </Route>
+            <Route path="program-view/:programId/unit-standards/:unitStandardId" element={<UnitStandardLayout />}>
+              <Route index element={<UnitStandardOverview />} />
+              <Route path="content" element={<UnitStandardResources />} />
+              <Route path="assessments" element={<AssessmentPage />} />
+              <Route path="assessments/:assessmentId" element={<AssessmentViewPage />} />
+              <Route path="assessments/new" element={<AssessmentFormPage />} />
+              <Route path="assessments/:assessmentId/edit" element={<AssessmentFormPage />} />
+            </Route>
+          </Route>
+        </Route>
+
+        {/* MENTOR ROUTES */}
+        <Route element={<ProtectedRoute role="MENTOR" />}>
+          <Route path={ROUTES.MENTOR} element={<Layout />}>
+            <Route index element={<MentorPage />} />
+            <Route path="program-view/:programId" element={<MentorProgramView />}>
+              <Route index element={<ProgramOverview />} />
+              <Route path="interns" element={<InternsList />} />
+              <Route path="interns/:internId" element={<InternReports />} />
+            </Route>
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
+        </Route>
+
+        {/* INTERN ROUTES */}
+        <Route element={<ProtectedRoute role="INTERN" />}>
+          <Route path={ROUTES.INTERN} element={<InternPage />}>
+            <Route index element={<InternOverview />} />
+            <Route path="reports" element={<InternReportPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
+        </Route>
+
+        {/* LEARNER ROUTES */}
+        <Route element={<ProtectedRoute role="LEARNER" />}>
+          <Route path={ROUTES.LEARNER} element={<Layout />}>
+            <Route index element={<LearnerDashboard />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="unit-standard/:unitStandardId" element={<CourseViewPage />}>
+              <Route index element={<LearnerUnitStandardOverview />} />
+              <Route path="content" element={<ContentPage />} />
+              <Route path="assessments" element={<LearnerAssessmentPage />} />
+              <Route path="assessments/:id" element={<DocumentAssessment />} />
+              <Route path="assessments/:id/start" element={<TestStart />} />
+              <Route path="assessments/:id/write" element={<TestTaking />} />
+              <Route path="assessments/:id/completed" element={<TestComplete />} />
+              <Route path="assessments/:id/results" element={<TestResults />} />
+            </Route>
+          </Route>
+        </Route>
+
+        {/* PUBLIC ROUTES */}
+        <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/policy" element={<Policy />} />
+          <Route path="/help" element={<Help />} />
           <Route path={ROUTES.UNAUTHORIZED} element={<ForbiddenPage />} />
           <Route path={ROUTES.NOT_FOUND} element={<PageNotFound />} />
           <Route path={ROUTES.INTERNAL_ERROR} element={<InternalError />} />
-          {/*<Route path="*" element={<Navigate to={ROUTES.NOT_FOUND} replace />} />*/}
         </Route>
 
+        {/* Catch-all route for 404 */}
+        <Route path="*" element={<Navigate to={ROUTES.NOT_FOUND} replace />} />
       </Routes>
     </Container>
   );
 }
-
-

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Accordion, Badge, Button, Spinner } from 'react-bootstrap';
-import { FaClipboardList, FaFlask, FaChartLine, FaGraduationCap, FaCalendarAlt, FaCheckCircle, FaRegCircle, FaStar, FaClock, FaEye } from 'react-icons/fa';
+import { FaClipboardList, FaFlask, FaChartLine, FaGraduationCap, FaCalendarAlt, FaCheckCircle, FaRegCircle, FaStar, FaClock, FaEye, FaFilePdf } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
 import { assessmentService } from '@/components/facilitator/unit_standards/unit_standard/assessment/services/AssessmentService';
+import { BASE_URL } from '@/utils/apiEndpoint';
 
 export default function LearnerAssessmentPage() {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export default function LearnerAssessmentPage() {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
-  const AssessmentItem = ({ item, path,resultsPath }) => {
+  const AssessmentItem = ({ item, path, resultsPath }) => {
     const hasSubmission = item.hasSubmission || false;
     const submission = item?.submission;
     const status = submission?.status;
@@ -90,28 +91,48 @@ export default function LearnerAssessmentPage() {
                 <div className="flex-1 min-w-0">
                   {/* Status Row */}
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <FaCheckCircle className="w-4 h-4 text-green-500" />
-                      <span className="text-sm font-semibold text-gray-900">Submitted</span>
-                    </div>
+                    {status === 'SUBMITTED' && (
+                      <div className="flex items-center gap-1.5">
+                        <FaCheckCircle className="w-4 h-4 text-green-500" />
+                        <span className="text-sm font-semibold text-gray-900">Submitted</span>
+                      </div>
+                    )}
 
                     {status === 'GRADED' && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
                         Graded
                       </span>
                     )}
+
                     {status === 'RE_SUBMITTED' && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase bg-amber-100 text-amber-800">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase bg-sky-100 text-sky-800">
                         Resubmitted
                       </span>
                     )}
-                  </div>
 
+                    {status === 'APPROVED' && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Approved
+                      </span>
+                    )}
+
+                    {status === 'REJECTED' && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Rejected
+                      </span>
+                    )}
+                  </div>
 
                   <div className="space-y-1">
                     <p className="text-xs text-gray-500">
                       Submitted on <span className="text-gray-700 font-medium">{formatSubmissionDate(submission.submittedAt)}</span>
                     </p>
+
+                    {submission.gradedAt && (
+                      <p className="text-xs text-gray-500">
+                        Graded on <span className="text-gray-700 font-medium">{formatSubmissionDate(submission.gradedAt)}</span>
+                      </p>
+                    )}
 
                     {submission.obtainedMarks !== null && (
                       <div className="flex items-center gap-1.5 mt-2">
@@ -121,6 +142,30 @@ export default function LearnerAssessmentPage() {
                           <span className="text-gray-400 font-normal mx-0.5">/</span>
                           {item.totalMarks}
                         </span>
+                      </div>
+                    )}
+
+                    {submission.feedback && (
+                      <div className="mt-2 p-2 bg-gray-50 rounded-md">
+                        <p className="text-xs text-gray-500">Feedback</p>
+                        <p className="text-sm text-gray-700">{submission.feedback}</p>
+                      </div>
+                    )}
+
+                    {submission.fileUrl && (
+                      <div className="mt-2">
+                        <a
+                          href={`${BASE_URL}${submission.fileUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          <FaFilePdf className="w-3 h-3" />
+                          {submission.fileName || 'View Submission'}
+                          {submission.fileSize && (
+                            <span className="text-gray-400">({(submission.fileSize / 1024).toFixed(1)} KB)</span>
+                          )}
+                        </a>
                       </div>
                     )}
                   </div>
@@ -233,7 +278,7 @@ export default function LearnerAssessmentPage() {
               </Accordion.Header>
               <Accordion.Body className="p-3">
                 {assessments.test.map((item) => (
-                  <AssessmentItem path={`${item?.id}/start`}  resultsPath={`${item?.id}/results`}  key={item.id} item={item} />
+                  <AssessmentItem path={`${item?.id}/start`} resultsPath={`${item?.id}/results`} key={item.id} item={item} />
                 ))}
               </Accordion.Body>
             </Accordion.Item>

@@ -166,7 +166,7 @@ export default function DocumentAssessment() {
           )}
 
           <button 
-            onClick={() => navigate('/learner/assessments')}
+            onClick={() => navigate(-1)}
             className="px-6 py-2  text-white rounded-md text-sm font-medium hover:bg-slate-700"
           >
             Back to Assessments

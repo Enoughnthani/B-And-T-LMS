@@ -98,12 +98,6 @@ export const LearnerDashboard = () => {
 
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-slate-800">My Unit Standards</h2>
-            <button
-              onClick={() => navigate(`unit-standards/${program?.id}`)}
-              className="bg-transparent text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
-            >
-              View All →
-            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">

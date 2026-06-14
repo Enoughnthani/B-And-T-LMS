@@ -9,6 +9,7 @@ import {
   FaChartLine,
   FaCog,
   FaQuestionCircle,
+  FaTasks,
   FaUsers
 } from "react-icons/fa";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -21,21 +22,20 @@ export default function AdminDashboard() {
   const location = useLocation()
 
 
-
   return (
     <div className="min-h-screen flex text-gray-800">
 
       <aside className="hidden md:block min-w-[16rem] bg-white shadow-md border !border-gray-200 py-6 px-1.5 ">
         <div className="flex mx-2 items-center gap-3 pb-4">
-         <LogoImage/>
+          <LogoImage />
         </div>
 
         <ul className="p-1">
           {[
             { icon: <FaChartLine />, label: "Dashboard", path: '/user/admin' },
             { icon: <FaUsers />, label: "Users", path: '/user/admin/users' },
+            { icon: <FaTasks />, label: "Activities", path: '/user/admin/activities' },
             { icon: <FaCog />, label: "Settings", path: '/user/admin/settings' },
-            { icon: <FaBell />, label: "Notifications", path: '/user/admin/notifications' },
             { icon: <FaQuestionCircle />, label: "Help", path: '/user/admin/help' },
             { icon: <LogOut />, label: "Logout", event: logout },
           ].map((item, idx) => {
