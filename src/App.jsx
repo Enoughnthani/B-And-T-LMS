@@ -1,5 +1,5 @@
 // src/App.jsx
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminProfile from "@/components/admin/profile/AdminProfile";
@@ -233,6 +233,8 @@ export default function App() {
           <Route path={ROUTES.NOT_FOUND} element={<PageNotFound />} />
           <Route path={ROUTES.INTERNAL_ERROR} element={<InternalError />} />
         </Route>
+
+        
 
         {/* Catch-all route for 404 */}
         <Route path="*" element={<Navigate to={ROUTES.NOT_FOUND} replace />} />
